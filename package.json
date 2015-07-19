@@ -1,0 +1,37 @@
+{
+  "name": "risk",
+  "version": "0.0.0",
+  "description": "",
+  "main": "promise-method-all.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.1.0",
+    "chai-as-promised": "^5.1.0",
+    "dotty": "0.0.2",
+    "express": "^4.13.1",
+    "express-promise-router": "0.0.9",
+    "node-mocks-http": "^1.4.3",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0",
+    "supertest": "^1.0.1",
+    "supertest-as-promised": "^2.0.2"
+  },
+  "dependencies": {
+    "arguejs": "^0.2.3",
+    "argx": "^1.0.5",
+    "bluebird": "^2.9.34",
+    "debug": "^2.2.0",
+    "fs-extra": "^0.22.1",
+    "minimist": "^1.1.1",
+    "tomdale": "^2.0.4",
+    "underscore": "^1.8.3",
+    "underscore.string": "^3.1.1"
+  }
+}
