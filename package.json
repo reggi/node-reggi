@@ -1,0 +1,32 @@
+{
+  "name": "untitled",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bluebird": "^2.9.34",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "jsdoctest": "^1.6.0",
+    "mocha": "^2.2.5",
+    "mock-fs": "^3.0.0"
+  },
+  "dependencies": {
+    "acorn": "^2.1.0",
+    "acorn-umd": "^0.4.0",
+    "argx": "^1.1.5",
+    "bluebird": "^2.9.34",
+    "data.task": "^3.0.0",
+    "fs-extra": "^0.22.1",
+    "jsdoctest": "^1.6.0",
+    "lodash": "^3.10.0",
+    "mocha": "^2.2.5",
+    "ramda": "^0.17.1",
+    "underscore": "^1.8.3"
+  }
+}
