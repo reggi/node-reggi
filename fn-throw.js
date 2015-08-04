@@ -1,4 +1,4 @@
-var argx = require("argx")
+var argx = require('argx')
 
 /**
  * Returns a function that throws an error.
@@ -6,15 +6,15 @@ var argx = require("argx")
  * @prop {Object} [errorInstance] - An instance of an error Object.
  * @prop {String} [message] - A string message for the error.
  */
-function fnThrow(/*errorObject, errorInstance, message*/){
+function fnThrow (/* errorObject, errorInstance, message */) {
   var args = argx(arguments)
-  return function(){
-    var fn = args.shift(Function)
+  return function () {
+    var Fn = args.shift(Function)
     var obj = args.shift(Object)
     var str = args.shift(String)
-    if(fn && str) throw new fn(str)
-    if(obj) throw obj
-    if(str) throw new Error(str)
+    if (Fn && str) throw new Fn(str)
+    if (obj) throw obj
+    if (str) throw new Error(str)
     throw new Error()
   }
 }

@@ -1,15 +1,15 @@
-var _ = require("underscore")
-var Promise = require("bluebird")
-var argx = require("argx")
-var arrCamelize = require("./arr-camelize")
-var fnToMethod = require("./fn-to-method")
+var _ = require('underscore')
+// var Promise = require('bluebird')
+var argx = require('argx')
+var arrCamelize = require('./arr-camelize')
+var fnToMethod = require('./fn-to-method')
 
 /**
  * Take two functions and stitch them together to make a third, that interacts with parent arguments.
  * @module fn-reproduce
  * @example
- * _.extend(lib, fnReproduce.buildFnPrependArgs(lib, "readFile", "appendString", 2))
- * lib.readFileAppendString("hello.txt", "utf8", "world").should.eventually.equal("hello world")
+ * _.extend(lib, fnReproduce.buildFnPrependArgs(lib, 'readFile', 'appendString', 2))
+ * lib.readFileAppendString('hello.txt', 'utf8', 'world').should.eventually.equal('hello world')
  */
 
 var fnReproduce = {}
@@ -23,29 +23,30 @@ var fnReproduce = {}
  * @param {} [nonMatchValue] - Value to return if match is not made.
  * @return {Object} {fnName: [function]}
  */
-fnReproduce._match = function(/*fns, childArgOffset, matchValue, nonMatchValue*/){
+
+fnReproduce._match = function (/* fns, childArgOffset, matchValue, nonMatchValue */) {
   var args = argx(arguments)
   var a = {}
-  a.fns = args.shift("object")
-  a.childArgOffset = args.shift("number") || 0
+  a.fns = args.shift('object')
+  a.childArgOffset = args.shift('number') || 0
   a.matchValue = args.shift() || true
   a.nonMatchValue = args.shift() || false
   a.name = arrCamelize(_.keys(a.fns))
   a.fnsOnly = _.values(a.fns)
   var parentFn = a.fnsOnly[0]
   var childFn = a.fnsOnly[1]
-  var newFn = function(){
+  var newFn = function () {
     var parentArgs = _.values(arguments)
     var childArgs = _.rest(parentArgs, a.childArgOffset)
     var calledParentFn = parentFn.apply(null, parentArgs)
-    if(calledParentFn && typeof calledParentFn.then === 'function'){
-      return calledParentFn.then(function(value){
-        if(value == a.matchValue) return childFn.apply(null, childArgs)
+    if (calledParentFn && typeof calledParentFn.then === 'function') {
+      return calledParentFn.then(function (value) {
+        if (value === a.matchValue) return childFn.apply(null, childArgs)
         return a.nonMatchValue
       })
-    }else{
+    } else {
       var value = calledParentFn
-      if(value == a.matchValue) return childFn.apply(null, childArgs)
+      if (value === a.matchValue) return childFn.apply(null, childArgs)
       return a.nonMatchValue
     }
   }
@@ -59,25 +60,25 @@ fnReproduce._match = function(/*fns, childArgOffset, matchValue, nonMatchValue*/
  * @param {Number} [childArgOffset=0] - The number offset of parent arguments passed to child.
  * @return {Object} {fnName: [function]}
  */
-fnReproduce._prependArgs = function(/*fns, childArgOffset*/){
+fnReproduce._prependArgs = function (/* fns, childArgOffset */) {
   var args = argx(arguments)
   var a = {}
-  a.fns = args.shift("object")
-  a.childArgOffset = args.shift("number") || 0
+  a.fns = args.shift('object')
+  a.childArgOffset = args.shift('number') || 0
   a.name = arrCamelize(_.keys(a.fns))
   a.fnsOnly = _.values(a.fns)
   var parentFn = a.fnsOnly[0]
   var childFn = a.fnsOnly[1]
-  var newFn = function(){
+  var newFn = function () {
     var parentArgs = _.values(arguments)
     var childArgs = _.rest(parentArgs, a.childArgOffset)
     var calledParentFn = parentFn.apply(null, parentArgs)
-    if(calledParentFn && typeof calledParentFn.then === 'function'){
-      return calledParentFn.then(function(value){
+    if (calledParentFn && typeof calledParentFn.then === 'function') {
+      return calledParentFn.then(function (value) {
         childArgs.unshift(value)
         return childFn.apply(null, childArgs)
       })
-    }else{
+    } else {
       var value = calledParentFn
       childArgs.unshift(value)
       return childFn.apply(null, childArgs)
@@ -94,7 +95,7 @@ fnReproduce._prependArgs = function(/*fns, childArgOffset*/){
  * @param {String} childName - Child function name.
  * @return {Object} fns {parent: [function], child: [function]}
  */
-fnReproduce._buildFn = function(obj, parentName, childName){
+fnReproduce._buildFn = function (obj, parentName, childName) {
   var fns = {}
   _.extend(fns, fnToMethod(parentName, obj))
   _.extend(fns, fnToMethod(childName, obj))
@@ -109,11 +110,11 @@ fnReproduce._buildFn = function(obj, parentName, childName){
  * @param {String|Array} childrenName(s) - The array or string of children function name(s).
  * @return {Object} fnsArr [{parent: [function], child: [function]}]
  */
-fnReproduce.buildFn = function fnReproduceBuildFn(obj, parentNames, childrenNames){
+fnReproduce.buildFn = function fnReproduceBuildFn (obj, parentNames, childrenNames) {
   parentNames = _.flatten([parentNames])
   childrenNames = _.flatten([childrenNames])
-  var value = _.map(parentNames, function(parentName){
-    return _.map(childrenNames, function(childName){
+  var value = _.map(parentNames, function (parentName) {
+    return _.map(childrenNames, function (childName) {
       return fnReproduce._buildFn(obj, parentName, childName)
     })
   })
@@ -129,12 +130,12 @@ fnReproduce.buildFn = function fnReproduceBuildFn(obj, parentNames, childrenName
  * @param {Number} [childArgOffset=0] - The number offset of parent arguments passed to child.
  * @return {Object} {fnName: [function]} - Object with one or multiple function methods.
  */
-fnReproduce.prependArgs = function fnReproducePrependArgs(/*fnsArr*/){
+fnReproduce.prependArgs = function fnReproducePrependArgs (/* fnsArr */) {
   var args = argx(arguments)
-  var fnsArr = args.shift(Array) || args.shift("object")
+  var fnsArr = args.shift(Array) || args.shift('object')
   fnsArr = _.flatten([fnsArr])
   var remain = args.remain()
-  var results = _.map(fnsArr, function(fns){
+  var results = _.map(fnsArr, function (fns) {
     var childArgs = _.clone(remain)
     childArgs.unshift(fns)
     return fnReproduce._prependArgs.apply(null, childArgs)
@@ -154,18 +155,20 @@ fnReproduce.prependArgs = function fnReproducePrependArgs(/*fnsArr*/){
  * @param {String|Boolean|Number} [nonMatchValue] - Value to return if match is not made.
  * @return {Object} {fnName: [function]} - Object with one or multiple function methods.
  */
-fnReproduce.match = function fnReproduceMatch(/*fnsArr, childArgOffset, matchValue, nonMatchValue*/){
+fnReproduce.match = function fnReproduceMatch (/* fnsArr, childArgOffset, matchValue, nonMatchValue */) {
   var args = argx(arguments)
-  var fnsArr = args.shift(Array) || args.shift("object")
+  var fnsArr = args.shift(Array) || args.shift('object')
   fnsArr = _.flatten([fnsArr])
   var remain = args.remain()
-  var results = _.map(fnsArr, function(fns){
+  var results = _.map(fnsArr, function (fns) {
     var childArgs = _.clone(remain)
     childArgs.unshift(fns)
     return fnReproduce._match.apply(null, childArgs)
   })
   return _.extend.apply(null, [{}].concat(results))
 }
+
+var fns
 
 /**
  * Shorthand for running buildFn() & match().
@@ -178,7 +181,7 @@ fnReproduce.match = function fnReproduceMatch(/*fnsArr, childArgOffset, matchVal
  * @param {String|Boolean|Number} [nonMatchValue] - Value to return if match is not made.
  * @return {Object} {fnName: [function]} - Object with one or multiple function methods.
  */
-var fns = fnReproduce.buildFn(fnReproduce, "buildFn", "match")
+fns = fnReproduce.buildFn(fnReproduce, 'buildFn', 'match')
 _.extend(fnReproduce, fnReproduce.prependArgs(fns, 3))
 
 /**
@@ -190,7 +193,7 @@ _.extend(fnReproduce, fnReproduce.prependArgs(fns, 3))
  * @param {Number} [childArgOffset=0] - The number offset of parent arguments passed to child.
  * @return {Object} {fnName: [function]} - Object with one or multiple function methods.
  */
-var fns = fnReproduce.buildFn(fnReproduce, "buildFn", "prependArgs")
+fns = fnReproduce.buildFn(fnReproduce, 'buildFn', 'prependArgs')
 _.extend(fnReproduce, fnReproduce.prependArgs(fns, 3))
 
 module.exports = fnReproduce

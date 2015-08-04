@@ -1,14 +1,16 @@
-var chai = require("chai")
+var chai = require('chai')
 var expect = chai.expect
 
-var arrCamelize = require("../arr-camelize")
+var arrCamelize = require('../arr-camelize')
 
-describe("join-camel-case", function(){
-  it("should join array and camel case each item", function(){
-    expect(arrCamelize(["hello", "world"])).to.equal("helloWorld")
-    expect(arrCamelize(["foo", "bar"])).to.equal("fooBar")
-    expect(arrCamelize(["Foo", "bar"])).to.equal("fooBar")
-    expect(arrCamelize(["Foo", "bar", "baz"])).to.equal("fooBarBaz")
-    expect(arrCamelize(["Foo", "bar", "Baz"])).to.equal("fooBarBaz")
+/* global describe, it */
+
+describe('join-camel-case', function () {
+  it('should join array and camel case each item', function () {
+    expect(arrCamelize(['hello', 'world'])).to.equal('helloWorld')
+    expect(arrCamelize(['foo', 'bar'])).to.equal('fooBar')
+    expect(arrCamelize(['Foo', 'bar'])).to.equal('fooBar')
+    expect(arrCamelize(['Foo', 'bar', 'baz'])).to.equal('fooBarBaz')
+    expect(arrCamelize(['Foo', 'bar', 'Baz'])).to.equal('fooBarBaz')
   })
 })

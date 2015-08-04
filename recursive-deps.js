@@ -1,8 +1,8 @@
-var path = require("path")
-var lodash = require("lodash")
-var Promise = require("bluebird")
-var acorn = require("acorn")
-var umd = require("acorn-umd")
+var path = require('path')
+var lodash = require('lodash')
+var Promise = require('bluebird')
+var acorn = require('acorn')
+var umd = require('acorn-umd')
 var fs = Promise.promisifyAll(require('fs'))
 var assign = lodash.assign
 var flattenDeep = lodash.flattenDeep
@@ -22,11 +22,11 @@ var mapValues = lodash.mapValues
  * @param  {Array} [natives] - An array of native node modules
  * @return {Object} {"native": [], "local": [], "npm": []}
  */
-function recursiveDeps(srcpath, localRegex, acornParseOptions, umdOptions, natives){
+function recursiveDeps (srcpath, localRegex, acornParseOptions, umdOptions, natives) {
   natives = (natives || Object.keys(process.binding('natives')))
   localRegex = (localRegex || recursiveDeps.localRegex)
   return recursiveDeps.parseFile(srcpath, localRegex, acornParseOptions, umdOptions)
-    .then(function(deps){
+    .then(function (deps) {
       return recursiveDeps.byType(deps, localRegex, natives)
     })
     .then(recursiveDeps.getValues)
@@ -45,8 +45,8 @@ recursiveDeps.localRegex = /^.\.\/|^.\/|^\//
  * @param  {Object} [umdOptions] - [Supply options to acorn-umr]{@link https://github.com/megawac/acorn-umd}
  * @return {Array} An array object of module defination(s).
  */
-recursiveDeps.parseSrc = function parseSrc(src, acornParseOptions, umdOptions){
-  var acornParseDefaults = {sourceType: "module", ecmaVersion: 6}
+recursiveDeps.parseSrc = function parseSrc (src, acornParseOptions, umdOptions) {
+  var acornParseDefaults = {sourceType: 'module', ecmaVersion: 6}
   acornParseOptions = assign(acornParseDefaults, acornParseOptions)
   var ast = acorn.parse(src, acornParseOptions)
   return umd(ast, umdOptions)
@@ -58,13 +58,13 @@ recursiveDeps.parseSrc = function parseSrc(src, acornParseOptions, umdOptions){
  * @param  {RegExp} [localRegex] - The regex to base local module discovery after.
  * @return {Array} An array of local deps.
  */
-recursiveDeps.localDeps = function localDeps(deps, localRegex){
+recursiveDeps.localDeps = function localDeps (deps, localRegex) {
   localRegex = (localRegex || recursiveDeps.localRegex)
   return chain(deps)
-    .map(function(dep){
+    .map(function (dep) {
       return dep.source.value
     })
-    .filter(function(dep){
+    .filter(function (dep) {
       return dep.match(localRegex)
     })
     .value()
@@ -77,20 +77,20 @@ recursiveDeps.localDeps = function localDeps(deps, localRegex){
  * @param  {RegExp} [localRegex] - The regex to base local module discovery after.
  * @return {Array} An array object of module defination(s).
  */
-recursiveDeps.recurse = function recurse(deps, srcpath, localRegex){
+recursiveDeps.recurse = function recurse (deps, srcpath, localRegex) {
   localRegex = (localRegex || recursiveDeps.localRegex)
   var all = []
-  function _recurse(deps, srcpath, localRegex){
-    return Promise.map(deps, function(dep){
+  function _recurse (deps, srcpath, localRegex) {
+    return Promise.map(deps, function (dep) {
       var srcext = path.extname(srcpath)
       var depext = path.extname(dep)
-      if(depext == "") dep = dep+srcext
-      var deppath = path.join(srcpath, "..", dep)
-      return fs.readFileAsync(deppath, "utf8").then(recursiveDeps.parseSrc)
-    }).then(function(newDeps){
+      if (depext === '') dep = dep + srcext
+      var deppath = path.join(srcpath, '..', dep)
+      return fs.readFileAsync(deppath, 'utf8').then(recursiveDeps.parseSrc)
+    }).then(function (newDeps) {
       newDeps = flattenDeep(newDeps)
       all.push(newDeps)
-      if(!newDeps.length) return all
+      if (!newDeps.length) return all
       var localDeps = recursiveDeps.localDeps(newDeps, localRegex)
       return _recurse(localDeps, srcpath, localRegex)
     })
@@ -106,17 +106,17 @@ recursiveDeps.recurse = function recurse(deps, srcpath, localRegex){
  * @param  {Object} [umdOptions] - [Supply options to acorn-umr]{@link https://github.com/megawac/acorn-umd}
  * @return {Array} An array object of module defination(s).
 */
-recursiveDeps.parseFile = function parseFile(srcpath, localRegex, acornParseOptions, umdOptions){
+recursiveDeps.parseFile = function parseFile (srcpath, localRegex, acornParseOptions, umdOptions) {
   localRegex = (localRegex || recursiveDeps.localRegex)
-  return fs.readFileAsync(srcpath, "utf8")
-  .then(recursiveDeps.parseSrc)
-  .then(function(deps){
-    var localDeps = recursiveDeps.localDeps(deps, localRegex)
-    if(!localDeps.length) return flattenDeep([deps])
-    return recursiveDeps.recurse(localDeps, srcpath, localRegex).then(function(newDeps){
-      return flattenDeep([newDeps, deps])
+  return fs.readFileAsync(srcpath, 'utf8')
+    .then(recursiveDeps.parseSrc)
+    .then(function (deps) {
+      var localDeps = recursiveDeps.localDeps(deps, localRegex)
+      if (!localDeps.length) return flattenDeep([deps])
+      return recursiveDeps.recurse(localDeps, srcpath, localRegex).then(function (newDeps) {
+        return flattenDeep([newDeps, deps])
+      })
     })
-  })
 }
 
 /**
@@ -126,17 +126,17 @@ recursiveDeps.parseFile = function parseFile(srcpath, localRegex, acornParseOpti
  * @param  {Array} [natives] - An array of native node modules
  * @return {Object} Returns array of sorted module object definitions.
  */
-recursiveDeps.byType = function byType(deps, localRegex, natives){
+recursiveDeps.byType = function byType (deps, localRegex, natives) {
   natives = (natives || Object.keys(process.binding('natives')))
   localRegex = (localRegex || recursiveDeps.localRegex)
   var sort = {}
-  sort.local = filter(deps, function(dep){
+  sort.local = filter(deps, function (dep) {
     return dep.source.value.match(localRegex)
   })
-  sort.native = filter(deps, function(dep){
+  sort.native = filter(deps, function (dep) {
     return contains(natives, dep.source.value)
   })
-  sort.npm = filter(deps, function(dep){
+  sort.npm = filter(deps, function (dep) {
     return !dep.source.value.match(localRegex) && !contains(natives, dep.source.value)
   })
   return sort
@@ -147,9 +147,9 @@ recursiveDeps.byType = function byType(deps, localRegex, natives){
  * @param  {Object} sortedDeps - A sotrted object of module defination(s).
  * @return {Object} Returns array of sorted module object definitions containing strings.
  */
-recursiveDeps.getValues = function getValues(sortedDeps){
-  return mapValues(sortedDeps, function(sortedDepType){
-    var results = map(sortedDepType, function(sortedDep){
+recursiveDeps.getValues = function getValues (sortedDeps) {
+  return mapValues(sortedDeps, function (sortedDepType) {
+    var results = map(sortedDepType, function (sortedDep) {
       return sortedDep.source.value
     })
     return unique(results)

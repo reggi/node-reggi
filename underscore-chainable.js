@@ -1,40 +1,40 @@
-var _ = require("underscore")
+var _ = require('underscore')
 
 module.exports = {
-  makeChainable: function(){
-    var theObj = function(obj) {
-      if (obj instanceof theObj) return obj;
-      if (!(this instanceof theObj)) return new theObj(obj);
-      this._wrapped = obj;
+  makeChainable: function () {
+    var TheObj = function (obj) {
+      if (obj instanceof TheObj) return obj
+      if (!(this instanceof TheObj)) return new TheObj(obj)
+      this._wrapped = obj
     }
-    return theObj
+    return TheObj
   },
-  prototypeChain: function(thObj){
-    return function(obj){
-      var instance = thObj(obj);
-      instance._chain = true;
+  prototypeChain: function (thObj) {
+    return function (obj) {
+      var instance = thObj(obj)
+      instance._chain = true
       return instance
     }
   },
-  prototypeChainableBuilder: function(theObj){
-    var chainResult = function(instance, obj) {
-      return instance._chain ? theObj(obj).chain() : obj;
+  prototypeChainableBuilder: function (theObj) {
+    var chainResult = function (instance, obj) {
+      return instance._chain ? theObj(obj).chain() : obj
     }
-    return _.map(_.functions(theObj), function(name) {
-      var func = theObj[name];
-      theObj.prototype[name] = function() {
-        var args = [this._wrapped];
-        Array.prototype.push.apply(args, arguments);
-        return chainResult(this, func.apply(theObj, args));
-      };
-    });
+    return _.map(_.functions(theObj), function (name) {
+      var func = theObj[name]
+      theObj.prototype[name] = function () {
+        var args = [this._wrapped]
+        Array.prototype.push.apply(args, arguments)
+        return chainResult(this, func.apply(theObj, args))
+      }
+    })
   },
-  prototypeChainableValue: function(){
-    return function(){
-      return this._wrapped;
+  prototypeChainableValue: function () {
+    return function () {
+      return this._wrapped
     }
   },
-  extendChainable: function(theObj){
+  extendChainable: function (theObj) {
     var chainable = {}
     chainable.chain = _.prototypeChain(theObj)
     _.extend(theObj, chainable)

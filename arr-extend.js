@@ -1,4 +1,4 @@
-var _ = require("underscore");
+var _ = require('underscore')
 
 /**
  * Builds an object from an array of objects.
@@ -6,8 +6,8 @@ var _ = require("underscore");
  * @param  {Array} arr - An array containing objects.
  * @return {Object} An object where each item in the array is a property and value.
  */
-function arrExtend(arr) {
-  return _.extend.apply(null, [{}].concat(arr));
+function arrExtend (arr) {
+  return _.extend.apply(null, [{}].concat(arr))
 }
 
 module.exports = arrExtend

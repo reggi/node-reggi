@@ -1,5 +1,5 @@
-var _ = require("underscore")
-var argx = require("argx")
+var _ = require('underscore')
+var argx = require('argx')
 
 /**
  * `npm install fn-with-name-prop --save`
@@ -47,24 +47,24 @@ var argx = require("argx")
  * expect(fn).to.be.instanceof(Function)
  * expect(fn).to.have.property("_name", "hello")
  */
-function fnSetName(/*fn, fnName, objFns*/){
+function fnSetName (/* fn, fnName, objFns */) {
   var args = argx(arguments)
   var fn = args.shift(Function)
   var fnName = args.shift(String)
   var objFns = args.shift(Object)
-  var theFn = function(){
-    if(fn) return fn
-    if(!fn && objFns && _.size(objFns) == 1) return _.values(objFns)[0]
-    if(!fn && objFns && objFns[fnName]) return objFns[fnName]
-    throw new Error("no function found or provided")
-  }()
-  var theName = function(){
-    if(fnName) return fnName
-    if(!fn && objFns && _.size(objFns) == 1) return _.keys(objFns)[0]
-    if(!fnName && theFn.name) return fn.name
-    if(!fnName && theFn._name) return fn._name
-    throw new Error("no name found or provided")
-  }()
+  var theFn = (function () {
+    if (fn) return fn
+    if (!fn && objFns && _.size(objFns) === 1) return _.values(objFns)[0]
+    if (!fn && objFns && objFns[fnName]) return objFns[fnName]
+    throw new Error('no function found or provided')
+  }())
+  var theName = (function () {
+    if (fnName) return fnName
+    if (!fn && objFns && _.size(objFns) === 1) return _.keys(objFns)[0]
+    if (!fnName && theFn.name) return fn.name
+    if (!fnName && theFn._name) return fn._name
+    throw new Error('no name found or provided')
+  }())
   theFn._name = theName
   return theFn
 }

@@ -1,5 +1,5 @@
-var _ = require("lodash")
-var R = require("ramda")
+var _ = require('lodash')
+var R = require('ramda')
 
 /**
  * Joins array and camel cases each word
@@ -7,6 +7,6 @@ var R = require("ramda")
  * @param {Array} arr - An array of strings
  * @return {String}
  */
-var arrCamelize = R.pipe(R.join(" "), _.camelCase)
+var arrCamelize = R.pipe(R.join(' '), _.camelCase)
 
 module.exports = arrCamelize
