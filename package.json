@@ -12,9 +12,13 @@
     "bluebird": "^2.9.34",
     "chai": "^3.2.0",
     "chai-as-promised": "^5.1.0",
+    "directory-tree": "^0.1.1",
+    "dive": "^0.4.0",
+    "fs-extra": "^0.22.1",
     "jsdoctest": "^1.6.0",
     "mocha": "^2.2.5",
-    "mock-fs": "^3.0.0"
+    "mock-fs": "^3.0.0",
+    "underscore": "^1.8.3"
   },
   "dependencies": {
     "acorn": "^2.1.0",
@@ -23,10 +27,12 @@
     "async": "^1.4.0",
     "bluebird": "^2.9.34",
     "data.task": "^3.0.0",
-    "fs-extra": "^0.22.1",
+    "dotty": "0.0.2",
+    "fs-extra": "reggi/node-fs-extra",
     "graceful-fs": "^4.1.2",
     "jsdoctest": "^1.6.0",
     "lodash": "^3.10.0",
+    "minimist": "^1.1.2",
     "mocha": "^2.2.5",
     "ramda": "^0.17.1",
     "underscore": "^1.8.3"
