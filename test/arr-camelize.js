@@ -5,7 +5,7 @@ var arrCamelize = require('../arr-camelize')
 
 /* global describe, it */
 
-describe('join-camel-case', function () {
+describe('arr-camelize', function () {
   it('should join array and camel case each item', function () {
     expect(arrCamelize(['hello', 'world'])).to.equal('helloWorld')
     expect(arrCamelize(['foo', 'bar'])).to.equal('fooBar')
