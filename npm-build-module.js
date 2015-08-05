@@ -23,10 +23,11 @@ function debugThen () {
  * @param  {String} jsFile - Path to main file.
  * @param  {String} [name] - Name of module.
  */
-module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName) {
+module.exports = function (jsFile, name, testDir, docsDir, localDir, packagesDir, readmeName) {
   if (!localDir) localDir = path.join('local_modules')
   if (!docsDir) docsDir = path.join('docs')
   if (!testDir) testDir = path.join('test')
+  if (!packagesDir) packagesDir = path.join('packages')
   if (!readmeName) readmeName = 'readme.md'
   return Promise.resolve()
   .then(function () {
@@ -43,6 +44,7 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
     paths.testDst = path.join(paths.localModulesDirDst, testDir, pkg.main)
     paths.readme = path.join(docsDir, pkg.name + '.md')
     paths.readmeDst = path.join(paths.localModulesDirDst, 'readme.md')
+    paths.packageBackup = path.join(packagesDir, 'package-' + pkg.name + '.json')
     paths.package = path.join('package.json')
     paths.packageDst = path.join(paths.localModulesDirDst, 'package.json')
     paths.mainDst = path.join(paths.localModulesDirDst, pkg.main)
@@ -79,9 +81,22 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
                 return fse.writeJsonAsync(paths.packageDst, existingPkg)
               }).then(debugThen('updating package deps %s', paths.packageDst)).catch(debugCatch)
             } else {
-              return fse.writeJsonAsync(paths.packageDst, pkg)
-              .then(debugThen('writing package %s', paths.packageDst)).catch(debugCatch)
+              return fs.lstatAsync(paths.packageBackup).then(R.T, R.F).then(function (exists) {
+                if (exists) {
+                  return fse.readJsonAsync(paths.packageBackup).then(function (existingPkg) {
+                    existingPkg.devDependencies = pkgDeps.devDependencies
+                    existingPkg.dependencies = pkgDeps.dependencies
+                    return fse.writeJsonAsync(paths.packageDst, existingPkg)
+                  }).then(debugThen('updating package from backup %s', paths.packageBackup)).catch(debugCatch)
+                } else {
+                  return fse.writeJsonAsync(paths.packageDst, pkg)
+                  .then(debugThen('writing package %s', paths.packageDst)).catch(debugCatch)
+                }
+              })
             }
+          }).then(function () {
+            return fse.ensureLinkAsync(paths.packageDst, paths.packageBackup)
+            .then(debugThen('writing package backup %s', paths.packageDst, paths.packageBackup)).catch(debugCatch)
           }),
           // map over local dependencies
           'localDeps': Promise.map(pkgDeps.mainDeps.local, function (dep) {
