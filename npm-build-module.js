@@ -94,6 +94,7 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
             return fse.ensureLinkAsync(dep, dstDep)
             .then(debugThen('linking local dep %s -> %s', dep, dstDep)).catch(debugCatch)
           }).then(function (data) {
+            // map over local dev dependencies
             return Promise.map(pkgDeps.testDeps.local, function (dep) {
               var srcpath = pkg.main
               var srcext = path.extname(srcpath)

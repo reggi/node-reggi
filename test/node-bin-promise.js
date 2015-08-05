@@ -4,7 +4,7 @@ module.exports = function (str, err) {
     return Promise.resolve().then(function () {
       throw err
     })
-  }else{
+  } else {
     return Promise.resolve(str)
   }
 }
