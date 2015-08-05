@@ -27,6 +27,7 @@
     "async": "^1.4.0",
     "bluebird": "^2.9.34",
     "data.task": "^3.0.0",
+    "debug": "^2.2.0",
     "dotty": "0.0.2",
     "fs-extra": "reggi/node-fs-extra",
     "graceful-fs": "^4.1.2",

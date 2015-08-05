@@ -6,9 +6,9 @@ var modPath = (argv.module) ? argv.module : argv._.shift()
 var mod = require(path.join(process.cwd(), modPath))
 var fn = (argv.method) ? dotty.get(mod, argv.method) : mod
 var args = argv._
-var toLog = (argv.log) ? argv.log : true
-var toThrow = (args.throw) ? args.throw : true
-var toStringify = (args.stringify) ? args.stringify : true
+var toLog = (argv.stoplog) ? !argv.stoplog : true
+var toThrow = (args.stopthrow) ? !args.stopthrow : true
+var toStringify = (args.stoplog) ? !args.stoplog : true
 
 args = _.map(args, function (arg) {
   if (arg === 'null') return null
@@ -21,9 +21,9 @@ args = _.map(args, function (arg) {
  * --module - the module to execute, if not available uses first argument
  * --method - allows you to specify a module function method
  * --type=('promise'|'callback') - allows you to wrap the output of the function
- * --throw - allows you to specify whether or not to throw error (default true)
- * --log - allows you to specify whether or not to log result (default true)
- * --stringify - allows you to specify whether or not to json.stringfy log result (default true)
+ * --stopthrow - allows you to specify whether or not to throw error (default true)
+ * --stoplog - allows you to specify whether or not to log result (default true)
+ * --stopstringify - allows you to specify whether or not to json.stringfy log result (default true)
  */
 
 if (argv.type === 'promise') {

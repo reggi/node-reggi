@@ -65,6 +65,7 @@ recursiveDeps.localDeps = function localDeps (deps, localRegex) {
       return dep.source.value
     })
     .filter(function (dep) {
+      if (typeof dep === "undefined") return false
       return dep.match(localRegex)
     })
     .value()
@@ -130,6 +131,12 @@ recursiveDeps.byType = function byType (deps, localRegex, natives) {
   natives = (natives || Object.keys(process.binding('natives')))
   localRegex = (localRegex || recursiveDeps.localRegex)
   var sort = {}
+
+  deps = filter(deps, function (dep) {
+    if (typeof dep.source.value === "undefined") return false
+    return true
+  })
+
   sort.local = filter(deps, function (dep) {
     return dep.source.value.match(localRegex)
   })

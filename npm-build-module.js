@@ -1,3 +1,4 @@
+var debug = require('debug')('npm-build-module')
 var R = require('ramda')
 var path = require('path')
 var Promise = require('bluebird')
@@ -5,11 +6,17 @@ var fs = Promise.promisifyAll(require('fs'))
 var fse = Promise.promisifyAll(require('fs-extra'))
 var packageDeps = require('./package-deps')
 
-function existsEnsure (srcpath, dstpath) {
-  return fs.lstatAsync(srcpath).then(R.T, R.F).then(function (exists) {
-    if (exists) fse.ensureLinkAsync(srcpath, dstpath)
-    return false
-  })
+function debugCatch (e) {
+  debug(e.message)
+  return false
+}
+
+function debugThen () {
+  var args = Array.prototype.slice.call(arguments)
+  return function (value) {
+    debug.apply(null, args)
+    return value
+  }
 }
 
 /**
@@ -41,11 +48,14 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
     paths.mainDst = path.join(paths.localModulesDirDst, pkg.main)
     return Promise.props({
       // link mainfile
-      'linkMainfile': fse.ensureLinkAsync(pkg.main, paths.mainDst),
+      'linkMainfile': fse.ensureLinkAsync(pkg.main, paths.mainDst)
+      .then(debugThen('linking main %s -> %s', pkg.main, paths.mainDst)).catch(debugCatch),
       // link test if exists
-      'linkTest': existsEnsure(paths.test, paths.testDst),
+      'linkTest': fse.ensureLinkAsync(paths.test, paths.testDst)
+      .then(debugThen('linking test %s -> %s', paths.test, paths.testDst)).catch(debugCatch),
       // link readme if exists
-      'linkReadme': existsEnsure(paths.readme, paths.readmeDst),
+      'linkReadme': fse.ensureLinkAsync(paths.readme, paths.readmeDst)
+      .then(debugThen('linking readme %s -> %s', paths.readme, paths.readmeDst)).catch(debugCatch),
       // check test
       'testExists': fs.lstatAsync(paths.test).then(R.T, R.F)
     }).then(function (data) {
@@ -56,13 +66,25 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
         pkg.dependencies = pkgDeps.dependencies
         pkgDeps.testDeps.local = (pkgDeps.testDeps.local) ? pkgDeps.testDeps.local : []
         pkgDeps.mainDeps.local = (pkgDeps.mainDeps.local) ? pkgDeps.mainDeps.local : []
-        return Promise.all([
+        return Promise.props({
           // symlink new local module to node modules
-          fse.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst),
+          'symlinkModule': fse.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
+          .then(debugThen('symlinking module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst)).catch(debugCatch),
           // write the new package.json file
-          fse.writeJSONAsync(paths.packageDst, pkg),
+          'writePkg': fs.lstatAsync(paths.packageDst).then(R.T, R.F).then(function (exists) {
+            if (exists) {
+              return fse.readJsonAsync(paths.packageDst).then(function (existingPkg) {
+                existingPkg.devDependencies = pkgDeps.devDependencies
+                existingPkg.dependencies = pkgDeps.dependencies
+                return fse.writeJsonAsync(paths.packageDst, existingPkg)
+              }).then(debugThen('updating package deps %s', paths.packageDst)).catch(debugCatch)
+            } else {
+              return fse.writeJsonAsync(paths.packageDst, pkg)
+              .then(debugThen('writing package %s', paths.packageDst)).catch(debugCatch)
+            }
+          }),
           // map over local dependencies
-          Promise.map(pkgDeps.mainDeps.local, function (dep) {
+          'localDeps': Promise.map(pkgDeps.mainDeps.local, function (dep) {
             var srcpath = pkg.main
             var srcext = path.extname(srcpath)
             var depext = path.extname(dep)
@@ -70,19 +92,21 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, readmeName)
             var deppath = path.join(srcpath, '..', dep)
             var dstDep = path.join(paths.localModulesDirDst, deppath)
             return fse.ensureLinkAsync(dep, dstDep)
-          }),
-          // map over local dev dependencies
-          Promise.map(pkgDeps.testDeps.local, function (dep) {
-            var srcpath = pkg.main
-            var srcext = path.extname(srcpath)
-            var depext = path.extname(dep)
-            if (depext === '') dep = dep + srcext
-            var deppath = path.join(testDir, dep)
-            var dstDep = path.join(paths.localModulesDirDst, deppath)
-            return fse.ensureLinkAsync(deppath, dstDep)
+            .then(debugThen('linking local dep %s -> %s', dep, dstDep)).catch(debugCatch)
+          }).then(function (data) {
+            return Promise.map(pkgDeps.testDeps.local, function (dep) {
+              var srcpath = pkg.main
+              var srcext = path.extname(srcpath)
+              var depext = path.extname(dep)
+              if (depext === '') dep = dep + srcext
+              var deppath = path.join(testDir, dep)
+              var dstDep = path.join(paths.localModulesDirDst, deppath)
+              return fse.ensureLinkAsync(deppath, dstDep)
+              .then(debugThen('linking local dev dep %s -> %s', deppath, dstDep)).catch(debugCatch)
+            })
           })
-        ])
+        })
       })
     })
-  })
+  }).then(debugThen('done'))
 }

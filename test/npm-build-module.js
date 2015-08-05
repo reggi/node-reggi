@@ -131,11 +131,11 @@ describe('package-deps', function () {
   function verifyLinkOrSymlink (src, dst) {
     var srcStat = fs.lstatSync(src)
     var dstStat = fs.lstatSync(dst)
-    if (srcStat.isFile() && (dstStat.isFile() || dstStat.isSymlink())) {
+    if (srcStat.isFile() && (dstStat.isFile() || dstStat.isSymbolicLink())) {
       var srcContent = fs.readFileSync(src, 'utf8')
       var dstContent = fs.readFileSync(dst, 'utf8')
       return [srcContent, dstContent]
-    }else if (srcStat.isDirectory() && (dstStat.isDirectory() || dstStat.isSymlink())) {
+    }else if (srcStat.isDirectory() && (dstStat.isDirectory() || dstStat.isSymbolicLink())) {
       var srcContents = fs.readdirSync(src)
       var dstContents = fs.readdirSync(dst)
       return [srcContents, dstContents]
@@ -186,8 +186,11 @@ describe('package-deps', function () {
         // files and dirs
         assert.equal(fs.lstatSync('./local_modules').isDirectory(), true)
         assert.equal(fs.lstatSync('./local_modules/' + fileName).isDirectory(), true)
+
         if (expected.test) assert.equal(fs.lstatSync('./local_modules/' + fileName + '/test').isDirectory(), true)
         // links
+        assert.equal(fs.lstatSync('./local_modules/' + fileName + '/' + file).isFile(), true)
+        assert.equal.apply(null, verifyLinkOrSymlink('./' + file, './local_modules/' + fileName))
         if (expected.test) assert.equal.apply(null, verifyLinkOrSymlink('./test/' + file, './local_modules/' + fileName + '/test/' + file))
         if (expected.docs) assert.equal.apply(null, verifyLinkOrSymlink('./docs/' + fileName + '.md', './local_modules/' + fileName + '/readme.md'))
         assert.equal.apply(null, verifyLinkOrSymlink('./' + file, './local_modules/' + fileName + '/' + file))

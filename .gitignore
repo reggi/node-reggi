@@ -1,3 +1,4 @@
+local_modules
 node_modules
 docs
 .DS_Store
