@@ -7,7 +7,7 @@ var expect = chai.expect
 
 var mock = require('mock-fs')
 
-var recursiveDeps = require('../recursive-deps.js')
+var recursiveDeps = require('../recursive-deps')
 
 /* global describe, before, after, it */
 
