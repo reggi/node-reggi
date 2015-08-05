@@ -15,12 +15,17 @@ describe('recursive-deps', function () {
   before(function () {
     mock({
       'hello.js': '',
+      'folder': {
+        'file-require-local': 'var local = require("../file-require-sibling.js")'
+      },
+      'file-require-sibling.js': 'var local = require("./file-require-underscore.js")',
       'file-require-underscore.js': 'var underscore = require("underscore")',
       'file-import-underscore.js': 'import underscore from "underscore"',
       'file-require-path.js': 'var path = require("path")',
       'file-import-path.js': 'import path from "path"',
       'file-require-local.js': 'var hello = require("./hello.js")',
       'file-import-local.js': 'import hello from "./hello.js"',
+      'file-require-json.js': 'var pkg = require("./package.json")',
       'file-multi-file.js': (function () {
         var file = []
         file.push('var underscore = require("underscore")')
@@ -32,6 +37,33 @@ describe('recursive-deps', function () {
   })
   after(function () {
     mock.restore()
+  })
+
+
+  it('should track nested dep', function () {
+    return recursiveDeps('folder/file-require-local.js').then(function (value) {
+      expect(value).to.have.deep.property('npm')
+      expect(value).to.have.deep.property('local')
+      expect(value).to.have.deep.property('native')
+      expect(value.local).to.deep.equal([
+        'file-require-sibling.js',
+        'file-require-underscore.js'
+      ])
+      expect(value.native).to.be.empty
+      expect(value.npm).to.deep.equal([
+        'underscore'
+      ])
+    })
+  })
+  it('should track down one npm dependency using require', function () {
+    return recursiveDeps('file-require-json.js').then(function (value) {
+      expect(value).to.have.deep.property('npm')
+      expect(value).to.have.deep.property('local')
+      expect(value).to.have.deep.property('native')
+      expect(value.local).to.be.empty
+      expect(value.native).to.be.empty
+      expect(value.npm).to.be.empty
+    })
   })
   it('should track down one npm dependency using require', function () {
     return recursiveDeps('file-require-underscore.js').then(function (value) {

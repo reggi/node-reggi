@@ -20,21 +20,28 @@ function debugThen () {
 }
 
 /**
- * @param  {String} jsFile - Path to main file.
- * @param  {String} [name] - Name of module.
+ * npm-build-module
+ * @param  {string} mainFile      the javascript file to build into module
+ * @param  {string} moduleName        the name of the new module
+ * @param  {string} testDir     the path of the test directory
+ * @param  {string} docsDir     the path of the docs directory
+ * @param  {string} localDir    the path of the new local modules direcotry
+ * @param  {string} packagesDir the path of the new packages direcotry
+ * @param  {string} readmeName  the name for readme files
  */
-module.exports = function (jsFile, name, testDir, docsDir, localDir, packagesDir, readmeName) {
+module.exports = function (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, binOnly, readmeName) {
   if (!localDir) localDir = path.join('local_modules')
   if (!docsDir) docsDir = path.join('docs')
   if (!testDir) testDir = path.join('test')
   if (!packagesDir) packagesDir = path.join('packages')
+  if (!binDir) binDir = path.join('bin')
   if (!readmeName) readmeName = 'readme.md'
   return Promise.resolve()
   .then(function () {
-    if (!jsFile) throw new Error('need main file to build module')
+    if (!mainFile) throw new Error('need main file to build module')
     var pkg = {}
-    pkg.main = jsFile
-    pkg.name = (name) ? name : path.basename(jsFile, path.extname(jsFile))
+    pkg.main = mainFile
+    pkg.name = (moduleName) ? moduleName : path.basename(mainFile, path.extname(mainFile))
     var paths = {}
     paths.nodeModulesDir = path.join('node_modules')
     paths.nodeModulesDirDst = path.join(paths.nodeModulesDir, pkg.name)
@@ -44,6 +51,8 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, packagesDir
     paths.testDst = path.join(paths.localModulesDirDst, testDir, pkg.main)
     paths.readme = path.join(docsDir, pkg.name + '.md')
     paths.readmeDst = path.join(paths.localModulesDirDst, 'readme.md')
+    paths.bin = path.join(binDir, pkg.main)
+    paths.binDst = path.join(paths.localModulesDirDst, 'bin', pkg.main)
     paths.packageBackup = path.join(packagesDir, 'package-' + pkg.name + '.json')
     paths.package = path.join('package.json')
     paths.packageDst = path.join(paths.localModulesDirDst, 'package.json')
@@ -58,14 +67,18 @@ module.exports = function (jsFile, name, testDir, docsDir, localDir, packagesDir
       // link readme if exists
       'linkReadme': fse.ensureLinkAsync(paths.readme, paths.readmeDst)
       .then(debugThen('linking readme %s -> %s', paths.readme, paths.readmeDst)).catch(debugCatch),
+      'linkBin': fse.ensureLinkAsync(paths.bin, paths.binDst)
+      .then(debugThen('linking bin %s -> %s', paths.bin, paths.binDst)).catch(debugCatch),
       // check test
-      'testExists': fs.lstatAsync(paths.test).then(R.T, R.F)
+      'testExists': fs.lstatAsync(paths.test).then(R.T, R.F),
+      'binExists': fs.lstatAsync(paths.bin).then(R.T, R.F)
     }).then(function (data) {
       // get package deps
       paths.test = (data.testExists) ? paths.test : false
       return packageDeps(pkg.main, paths.test, paths.package).then(function (pkgDeps) {
         pkg.devDependencies = pkgDeps.devDependencies
         pkg.dependencies = pkgDeps.dependencies
+        if (data.binExists) pkg.bin = path.join('bin', pkg.main)
         pkgDeps.testDeps.local = (pkgDeps.testDeps.local) ? pkgDeps.testDeps.local : []
         pkgDeps.mainDeps.local = (pkgDeps.mainDeps.local) ? pkgDeps.mainDeps.local : []
         return Promise.props({

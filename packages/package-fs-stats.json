@@ -1,0 +1,6 @@
+{
+  "main": "./fs-stats.js",
+  "name": "fs-stats",
+  "devDependencies": {},
+  "dependencies": {}
+}

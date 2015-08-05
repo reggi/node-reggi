@@ -1,0 +1,13 @@
+{
+  "main": "./fs-exists.js",
+  "name": "fs-exists",
+  "devDependencies": {
+    "mock-fs": "^3.0.0",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0"
+  },
+  "dependencies": {
+    "bluebird": "^2.9.34",
+    "ramda": "^0.17.1"
+  }
+}

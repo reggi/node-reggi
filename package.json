@@ -26,6 +26,7 @@
     "argx": "^1.1.5",
     "async": "^1.4.0",
     "bluebird": "^2.9.34",
+    "chalk": "^1.1.0",
     "data.task": "^3.0.0",
     "debug": "^2.2.0",
     "dotty": "0.0.2",
@@ -37,5 +38,9 @@
     "mocha": "^2.2.5",
     "ramda": "^0.17.1",
     "underscore": "^1.8.3"
+  },
+  "blackhole": {
+    "module_prefix": "reggi-",
+    "test": "standard && mocha"
   }
 }

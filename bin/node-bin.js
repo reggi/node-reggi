@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var _ = require('lodash')
 var dotty = require('dotty')
 var path = require('path')
