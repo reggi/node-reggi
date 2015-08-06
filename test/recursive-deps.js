@@ -1,147 +1,82 @@
-var chai = require('chai')
-var chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
-chai.should()
-
-var expect = chai.expect
-
-var mock = require('mock-fs')
-
+var CWD = process.cwd()
+// var _ = require('lodash')
+var util = require('util')
+var assert = require('assert')
+var path = require('path')
+var os = require('os')
+var Promise = require('bluebird')
+var fs = Promise.promisifyAll(require('fs-extra'))
 var recursiveDeps = require('../recursive-deps')
+var yaml = require('js-yaml')
+var ymlTests = fs.readFileSync(path.join(__dirname, './recursive-deps-tests.yml'), 'utf8')
+var tests = yaml.safeLoad(ymlTests)
+var ymlFiles = fs.readFileSync(path.join(__dirname, './recursive-deps-files.yml'), 'utf8')
+var files = yaml.safeLoad(ymlFiles)
 
-/* global describe, before, after, it */
+/* global describe, before, after, beforeEach, afterEach, it */
 
-describe('recursive-deps', function () {
+var ROOT_DESC = 'recursive-deps'
+var TEST_DIR = path.join(os.tmpdir(), ROOT_DESC)
+
+function clean (expected) {
+  if (!expected.local) expected.local = []
+  if (!expected.npm) expected.npm = []
+  if (!expected.native) expected.native = []
+  return expected
+}
+
+describe(ROOT_DESC, function () {
+
   before(function () {
-    mock({
-      'hello.js': '',
-      'folder': {
-        'file-require-local': 'var local = require("../file-require-sibling.js")'
-      },
-      'file-require-sibling.js': 'var local = require("./file-require-underscore.js")',
-      'file-require-underscore.js': 'var underscore = require("underscore")',
-      'file-import-underscore.js': 'import underscore from "underscore"',
-      'file-require-path.js': 'var path = require("path")',
-      'file-import-path.js': 'import path from "path"',
-      'file-require-local.js': 'var hello = require("./hello.js")',
-      'file-import-local.js': 'import hello from "./hello.js"',
-      'file-require-json.js': 'var pkg = require("./package.json")',
-      'file-multi-file.js': (function () {
-        var file = []
-        file.push('var underscore = require("underscore")')
-        file.push('var path = require("path")')
-        file.push('var hello = require("./hello.js")')
-        return file.join('\n')
-      }())
+    fs.emptyDirSync(TEST_DIR)
+    process.chdir(TEST_DIR)
+  })
+
+  beforeEach(function () {
+    return Promise.map(files, function (file) {
+      return fs.ensureFileAsync.apply(null, file)
     })
   })
+
+  afterEach(function () {
+    fs.emptyDirSync(TEST_DIR)
+  })
+
   after(function () {
-    mock.restore()
+    process.chdir(CWD)
+    fs.removeSync(TEST_DIR)
   })
 
+  it('should have mock file system', function () {
+    assert.equal(process.cwd().indexOf(TEST_DIR) > -1, true)
+  })
 
-  it('should track nested dep', function () {
-    return recursiveDeps('folder/file-require-local.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.deep.equal([
-        'file-require-sibling.js',
-        'file-require-underscore.js'
-      ])
-      expect(value.native).to.be.empty
-      expect(value.npm).to.deep.equal([
-        'underscore'
-      ])
+  tests.forEach(function (test) {
+    var should
+    var args = test.arguments
+    test.authoredPaths = (test.authoredPaths) ? clean(test.authoredPaths) : clean({})
+    test.relativePaths = (test.relativePaths) ? clean(test.relativePaths) : test.authoredPaths
+
+    should = util.format('should return deps as authored for %s', args[0])
+    it(should, function () {
+      return recursiveDeps.mapAuthoredPaths.apply(null, args).then(function (deps) {
+        // console.log(JSON.stringify(deps, null, 2))
+        assert.deepEqual(deps.local.sort(), test.authoredPaths.local.sort())
+        assert.deepEqual(deps.native.sort(), test.authoredPaths.native.sort())
+        assert.deepEqual(deps.npm.sort(), test.authoredPaths.npm.sort())
+      })
     })
-  })
-  it('should track down one npm dependency using require', function () {
-    return recursiveDeps('file-require-json.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.be.empty
-      expect(value.native).to.be.empty
-      expect(value.npm).to.be.empty
+
+    should = util.format('should return deps relative for %s', args[0])
+    it(should, function () {
+      return recursiveDeps.mapRelativePaths.apply(null, args).then(function (deps) {
+        // console.log(JSON.stringify(deps, null, 2))
+        assert.deepEqual(deps.local.sort(), test.relativePaths.local.sort())
+        assert.deepEqual(deps.native.sort(), test.relativePaths.native.sort())
+        assert.deepEqual(deps.npm.sort(), test.relativePaths.npm.sort())
+      })
     })
+
   })
-  it('should track down one npm dependency using require', function () {
-    return recursiveDeps('file-require-underscore.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.be.empty
-      expect(value.native).to.be.empty
-      expect(value.npm).to.have.length(1)
-      expect(value.npm).to.contain('underscore')
-    })
-  })
-  it('should track down one npm dependency using import', function () {
-    return recursiveDeps('file-import-underscore.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.be.empty
-      expect(value.native).to.be.empty
-      expect(value.npm).to.have.length(1)
-      expect(value.npm).to.contain('underscore')
-    })
-  })
-  it('should track down one native dependency using require', function () {
-    return recursiveDeps('file-require-path.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.be.empty
-      expect(value.npm).to.be.empty
-      expect(value.native).to.have.length(1)
-      expect(value.native).to.contain('path')
-    })
-  })
-  it('should track down one native dependency using import', function () {
-    return recursiveDeps('file-import-path.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.be.empty
-      expect(value.npm).to.be.empty
-      expect(value.native).to.have.length(1)
-      expect(value.native).to.contain('path')
-    })
-  })
-  it('should track down one local dependency using require', function () {
-    return recursiveDeps('file-require-local.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.npm).to.be.empty
-      expect(value.native).to.be.empty
-      expect(value.local).to.have.length(1)
-      expect(value.local).to.contain('./hello.js')
-    })
-  })
-  it('should track down one local dependency using import', function () {
-    return recursiveDeps('file-import-local.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.npm).to.be.empty
-      expect(value.native).to.be.empty
-      expect(value.local).to.have.length(1)
-      expect(value.local).to.contain('./hello.js')
-    })
-  })
-  it('should track down 3 dependencies one of each type', function () {
-    return recursiveDeps('file-multi-file.js').then(function (value) {
-      expect(value).to.have.deep.property('npm')
-      expect(value).to.have.deep.property('local')
-      expect(value).to.have.deep.property('native')
-      expect(value.local).to.have.length(1)
-      expect(value.local).to.contain('./hello.js')
-      expect(value.native).to.have.length(1)
-      expect(value.native).to.contain('path')
-      expect(value.npm).to.have.length(1)
-      expect(value.npm).to.contain('underscore')
-    })
-  })
+
 })

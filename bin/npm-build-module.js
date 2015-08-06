@@ -4,9 +4,10 @@ var minimist = require('minimist')
 var argv = minimist(process.argv.slice(2))
 var mainFile = (argv['main-file']) ? argv['main-file'] : argv._.shift()
 var npmBuildModule = require('../npm-build-module')
+var pkg = require('../package.json')
 
 if (argv.v || argv.version) {
-  console.log(require('../package.json').version)
+  console.log(pkg.version)
 } else if (mainFile) {
   npmBuildModule(
     mainFile,

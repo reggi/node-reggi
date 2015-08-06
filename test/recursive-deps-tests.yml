@@ -1,0 +1,76 @@
+---
+- arguments:
+  - ./file-require-sibling.js
+  authoredPaths:
+    local:
+    - ./file-require-underscore.js
+    npm:
+    - underscore
+- arguments:
+  - ./folder/file-require-local.js
+  authoredPaths:
+    local:
+    - ../file-require-sibling.js
+    - ./file-require-underscore.js
+    npm:
+    - underscore
+  relativePaths:
+    local:
+    - ./file-require-underscore.js
+    - ./file-require-sibling.js
+    npm:
+    - underscore
+- arguments:
+  - ./file-require-json.js
+- arguments:
+  - ./hello.js
+- arguments:
+  - ./file-import-json.js
+- arguments:
+  - ./file-require-underscore.js
+  authoredPaths:
+    npm:
+    - underscore
+- arguments:
+  - ./file-import-underscore.js
+  authoredPaths:
+    npm:
+    - underscore
+- arguments:
+  - ./file-require-path.js
+  authoredPaths:
+    native:
+    - path
+- arguments:
+  - ./file-import-path.js
+  authoredPaths:
+    native:
+    - path
+- arguments:
+  - ./file-require-local.js
+  authoredPaths:
+    local:
+    - ./hello.js
+- arguments:
+  - ./file-import-local.js
+  authoredPaths:
+    local:
+    - ./hello.js
+- arguments:
+  - ./file-require-multi-file.js
+  authoredPaths:
+    local:
+    - ./hello.js
+    native:
+    - path
+    npm:
+    - underscore
+- arguments:
+  - ./file-import-multi-file.js
+  authoredPaths:
+    local:
+    - ./hello.js
+    native:
+    - path
+    npm:
+    - underscore
