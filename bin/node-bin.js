@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 var _ = require('lodash')
-var dotty = require('dotty')
 var path = require('path')
 var argv = require('minimist')(process.argv.slice(2))
 var modPath = (argv.module) ? argv.module : argv._.shift()
@@ -11,8 +10,6 @@ var args = argv._
 var toLog = (argv.stoplog) ? !argv.stoplog : true
 var toThrow = (args.stopthrow) ? !args.stopthrow : true
 var toStringify = (args.stoplog) ? !args.stoplog : true
-
-
 
 args = _.map(args, function (arg) {
   if (arg === 'null') return null
@@ -34,7 +31,7 @@ if (argv.type === 'promise') {
   fn.apply(null, args)
   .then(function (data) {
     if (toLog && toStringify) {
-      console.log(JSON.stringify(data))
+      console.log(JSON.stringify(data, null, 2))
     } else if (toLog) {
       console.log(data)
     }
@@ -51,7 +48,7 @@ if (argv.type === 'promise') {
       if (data[0] === null) data.shift()
       if (data.length === 1) data = data[0]
       if (toLog && toStringify) {
-        console.log(JSON.stringify(data))
+        console.log(JSON.stringify(data, null, 2))
       } else if (toLog) {
         console.log(data)
       }
@@ -62,7 +59,7 @@ if (argv.type === 'promise') {
   try {
     var data = fn.apply(null, args)
     if (toLog && toStringify) {
-      console.log(JSON.stringify(data))
+      console.log(JSON.stringify(data, null, 2))
     } else if (toLog) {
       console.log(data)
     }

@@ -62,6 +62,8 @@ describe('arr-extract', function () {
 
     var original = _.cloneDeep(recursiveArrayObject)
     var extracted = arrExtract(recursiveArrayObject, 'profiles')
+    extracted = _.sortBy(extracted, 'name')
+    expetedFlattenedArray = _.sortBy(expetedFlattenedArray, 'name')
     assert.deepEqual(extracted, expetedFlattenedArray)
     assert.deepEqual(original, recursiveArrayObject)
   })
@@ -109,6 +111,8 @@ describe('arr-extract', function () {
 
     var original = _.cloneDeep(recursiveArrayObject)
     var extracted = arrExtract(recursiveArrayObject, 'profiles')
+    extracted = _.sortBy(extracted, 'name')
+    expetedFlattenedArray = _.sortBy(expetedFlattenedArray, 'name')
     assert.deepEqual(extracted, expetedFlattenedArray)
     assert.deepEqual(original, recursiveArrayObject)
   })

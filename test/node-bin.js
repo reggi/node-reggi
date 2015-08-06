@@ -6,23 +6,23 @@ child_process.execAsync = Promise.promisify(child_process.exec)
 
 /* global describe, it */
 
-describe('package-deps', function () {
+describe('node-bin', function () {
 
   var tests = {
     success: [
       // cmd, expected output
-      ['node ./node-bin.js ./test/node-bin-promise.js foo null --type=promise', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-promise.js bar null --type=promise', 'bar'],
-      ['node ./node-bin.js ./test/node-bin-callback.js foo null --type=callback', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-callback.js bar null --type=callback', 'bar'],
-      ['node ./node-bin.js ./test/node-bin-sync.js foo null', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-sync.js bar null', 'bar'],
-      ['node ./node-bin.js ./test/node-bin-promise.js foo --type=promise', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-promise.js bar --type=promise', 'bar'],
-      ['node ./node-bin.js ./test/node-bin-callback.js foo --type=callback', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-callback.js bar --type=callback', 'bar'],
-      ['node ./node-bin.js ./test/node-bin-sync.js foo', 'foo'],
-      ['node ./node-bin.js ./test/node-bin-sync.js bar', 'bar']
+      ['node ./bin/node-bin.js ./test/node-bin-promise.js foo null --type=promise', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-promise.js bar null --type=promise', 'bar'],
+      ['node ./bin/node-bin.js ./test/node-bin-callback.js foo null --type=callback', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-callback.js bar null --type=callback', 'bar'],
+      ['node ./bin/node-bin.js ./test/node-bin-sync.js foo null', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-sync.js bar null', 'bar'],
+      ['node ./bin/node-bin.js ./test/node-bin-promise.js foo --type=promise', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-promise.js bar --type=promise', 'bar'],
+      ['node ./bin/node-bin.js ./test/node-bin-callback.js foo --type=callback', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-callback.js bar --type=callback', 'bar'],
+      ['node ./bin/node-bin.js ./test/node-bin-sync.js foo', 'foo'],
+      ['node ./bin/node-bin.js ./test/node-bin-sync.js bar', 'bar']
     ]
   }
 

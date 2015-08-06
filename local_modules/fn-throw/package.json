@@ -1,0 +1,10 @@
+{
+  "main": "./fn-throw.js",
+  "name": "fn-throw",
+  "devDependencies": {
+    "chai": "^3.2.0"
+  },
+  "dependencies": {
+    "argx": "^1.1.5"
+  }
+}

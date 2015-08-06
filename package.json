@@ -1,12 +1,11 @@
 {
-  "name": "untitled",
+  "name": "reggi",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "description": "A collection of functions.",
   "scripts": {
     "test": "standard && mocha"
   },
-  "author": "",
+  "author": "Thomas Reggi",
   "license": "ISC",
   "devDependencies": {
     "bluebird": "^2.9.34",
@@ -39,9 +38,5 @@
     "mocha": "^2.2.5",
     "ramda": "^0.17.1",
     "underscore": "^1.8.3"
-  },
-  "blackhole": {
-    "module_prefix": "reggi-",
-    "test": "standard && mocha"
   }
 }

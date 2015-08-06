@@ -1,0 +1,9 @@
+{
+  "main": "./node-bin.js",
+  "name": "node-bin",
+  "devDependencies": {},
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "minimist": "^1.1.2"
+  }
+}

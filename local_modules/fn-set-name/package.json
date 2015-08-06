@@ -1,0 +1,11 @@
+{
+  "main": "./fn-set-name.js",
+  "name": "fn-set-name",
+  "devDependencies": {
+    "chai": "^3.2.0"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3",
+    "argx": "^1.1.5"
+  }
+}

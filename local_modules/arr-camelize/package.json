@@ -1,0 +1,11 @@
+{
+  "main": "./arr-camelize.js",
+  "name": "arr-camelize",
+  "devDependencies": {
+    "chai": "^3.2.0"
+  },
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "ramda": "^0.17.1"
+  }
+}

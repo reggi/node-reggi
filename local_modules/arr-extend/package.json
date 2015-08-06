@@ -1,0 +1,10 @@
+{
+  "main": "./arr-extend.js",
+  "name": "arr-extend",
+  "devDependencies": {
+    "chai": "^3.2.0"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
+  }
+}
