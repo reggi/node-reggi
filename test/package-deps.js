@@ -1,151 +1,132 @@
-var assert = require('assert')
-var chai = require('chai')
-var chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
-chai.should()
-var _ = require('underscore')
+var _ = require('lodash')
 var util = require('util')
-var os = require('os')
-var path = require('path')
-var fse = require('fs-extra')
-var fs = require('fs')
+var assert = require('assert')
+var chdirTemp = require('../test-chdir-temp')
+var fauxProject = require('../faux-project')
 var packageDeps = require('../package-deps')
-var CWD = process.cwd()
+var recursiveDeps = require('../recursive-deps')
+/* global describe, it */
 
-/* global describe, it, before, beforeEach, after, afterEach */
+function fauxPackageDeps (options) {
+  var expected = {}
 
-var TEST_DIR = path.join(os.tmpdir(), 'package-deps')
+  options.modules = (options.modules) ? options.modules : []
+  options.tests = (options.tests) ? options.tests : []
+
+  expected.localDeps = _.chain(options.modules)
+  .values()
+  .flattenDeep()
+  .groupBy(function (dep) {
+    return recursiveDeps.depType(dep)
+  })
+  .value()
+  .npm
+
+  expected.testDeps = _.chain(options.tests)
+  .values()
+  .flattenDeep()
+  .groupBy(function (dep) {
+    return recursiveDeps.depType(dep)
+  })
+  .value()
+  .npm
+
+  return fauxProject.package(expected.localDeps, expected.testDeps)
+}
+
+var tests = [
+  {
+    'deps': ['underscore'],
+    'root': './one.js',
+    'modules': {
+      './one.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './dir/two.js',
+    'modules': {
+      './dir/two.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './three.js',
+    'modules': {
+      './three.js': ['./four.js'],
+      './four.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './five.js',
+    'modules': {
+      './five.js': ['./dir/six.js'],
+      './dir/six.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './seven.js',
+    'modules': {
+      './seven.js': ['./eight.js'],
+      './eight.js': ['./nine.js'],
+      './nine.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './ten.js',
+    'modules': {
+      './ten.js': ['./dir/eleven.js'],
+      './dir/eleven.js': ['./dir/twelve.js'],
+      './dir/dir/twelve.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './thirteen.js',
+    'modules': {
+      './thirteen.js': ['./dir/dir/dir/dir/fourteen.js'],
+      './dir/dir/dir/dir/fourteen.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './fifteen.js',
+    'modules': {
+      './fifteen.js': ['./dir/dir/dir/dir/sixteen.js'],
+      './dir/dir/dir/dir/sixteen.js': ['../../../../foo/seventeen.js'],
+      './foo/seventeen.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './eighteen.js',
+    'modules': {
+      './eighteen.js': ['./nineteen.js'],
+      './nineteen.js': ['./twenty.js'],
+      './twenty.js': ['underscore']
+    }
+  }
+]
 
 describe('package-deps', function () {
+  chdirTemp(); if (!GLOBAL.fsmock) throw new Error('no mock')
 
-  before(function () {
-    fse.emptyDirSync(TEST_DIR)
-    process.chdir(TEST_DIR)
-  })
-
-  beforeEach(function () {
-    fs.writeFileSync('./package.json', (function () {
-      return [ '{',
-      '  "name": "example-package-deps",',
-      '  "version": "0.0.1",',
-      '  "description": "Example for testing packageDeps()",',
-      '  "devDependencies": {',
-      '    "bluebird": "^2.9.34",',
-      '    "chai": "^3.2.0",',
-      '    "chai-as-promised": "^5.1.0",',
-      '    "fs-extra": "reggi/node-fs-extra",',
-      '    "jsdoctest": "^1.6.0",',
-      '    "mocha": "^2.2.5",',
-      '    "mock-fs": "^3.0.0",',
-      '    "underscore": "^1.8.3"',
-      '  },',
-      '  "dependencies": {',
-      '    "acorn": "^2.1.0",',
-      '    "acorn-umd": "^0.4.0",',
-      '    "argx": "^1.1.5",',
-      '    "async": "^1.4.0",',
-      '    "bluebird": "^2.9.34",',
-      '    "data.task": "^3.0.0",',
-      '    "fs-extra": "^0.22.1",',
-      '    "graceful-fs": "^4.1.2",',
-      '    "jsdoctest": "^1.6.0",',
-      '    "lodash": "^3.10.0",',
-      '    "mocha": "^2.2.5",',
-      '    "ramda": "^0.17.1",',
-      '    "underscore": "^1.8.3"',
-      '  }',
-      '}'].join('\n')
-    }()))
-
-    fs.writeFileSync('./file-with-local.js', (function () {
-      return [
-        'var _ = require(\'underscore\')',
-        'var Promise = require(\'bluebird\')',
-        'var fs = Promise.promisifyAll(require(\'fs\'))',
-        'var local = require(\'./local-dep\')'
-      ].join('\n')
-    }()))
-
-    fs.writeFileSync('./local-dep.js', (function () {
-      return [
-        'var R = require(\'ramda\')'
-      ].join('\n')
-    }()))
-
-    fs.writeFileSync('./file-without-local.js', (function () {
-      return [
-        'var _ = require(\'underscore\')',
-        'var Promise = require(\'bluebird\')',
-        'var fs = Promise.promisifyAll(require(\'fs\'))'
-      ].join('\n')
-    }()))
-
-    fs.writeFileSync('./missing-dep.js', (function () {
-      return [
-        'var $ = require(\'jquery\')'
-      ].join('\n')
-    }()))
-
-  })
-
-  afterEach(function (done) {
-    fse.emptyDir(TEST_DIR, done)
-  })
-
-  after(function () {
-    process.chdir(CWD)
-    fse.removeSync(TEST_DIR)
-  })
-
-  var tests = {
-    'success': [
-      [['./file-with-local.js', './package.json'], {
-        dependencies: ['underscore', 'bluebird', 'ramda'],
-        devDependencies: []
-      }],
-      [['./file-without-local.js', './package.json'], {
-        dependencies: ['underscore', 'bluebird'],
-        devDependencies: []
-      }],
-      [['./local-dep.js', './package.json'], {
-        dependencies: ['ramda'],
-        devDependencies: []
-      }]
-    ],
-    'error': [
-      [['./missing-dep.js', false, './package.json']]
-    ]
-  }
-
-  function clenseDeps (pkg) {
-    if (Array.isArray(pkg)) return pkg.sort()
-    return _.keys(pkg).sort()
-  }
-
-  tests.success.forEach(function (test) {
-    test[1].dependencies = clenseDeps(test[1].dependencies)
-    test[1].devDependencies = clenseDeps(test[1].devDependencies)
-  })
-
-  tests.success.forEach(function (test) {
-    var args = test[0]
-    var expectedResult = test[1]
-    var should = util.format('should return expected result %s', JSON.stringify(expectedResult))
+  tests.forEach(function (test) {
+    var packageArgs = [test.deps, test.deps]
+    test.deps = (test.deps) ? test.deps : []
+    test.devDeps = (test.devDeps) ? test.devDeps : []
+    test.tests = (test.tests) ? test.tests : {}
+    _.extend(test.modules, test.tests)
+    var should = util.format('should return recursive deps for %s', test.root)
     it(should, function () {
-      return packageDeps.apply(null, args).then(function (pkg) {
-        var devDeps = clenseDeps(pkg.devDependencies)
-        var deps = clenseDeps(pkg.dependencies)
-        assert.deepEqual(devDeps, expectedResult.devDependencies)
-        assert.deepEqual(deps, expectedResult.dependencies)
+      fauxProject(packageArgs, test.modules)
+      var expected = fauxPackageDeps(test)
+      return packageDeps.deps(test.root, './package.json').then(function (deps) {
+        assert.deepEqual(deps, expected)
       })
-    })
-  })
-
-  tests.error.forEach(function (test) {
-    var args = test[0]
-    var should = util.format('should reject because insufficient deps')
-    it(should, function () {
-      return packageDeps.apply(null, args).should.be.rejected
     })
   })
 

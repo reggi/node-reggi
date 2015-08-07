@@ -9,7 +9,7 @@ function packageDeps (file, packageFile) {
   return recursiveDeps.mapRelativePaths(file)
   .then(function (deps) {
     results.deps = deps
-    var scan = _.flatten([deps.local, deps.root])
+    var scan = _.flattenDeep([deps.local, deps.root])
     var possibleFiles = packageDeps.possibleTestFiles(scan)
     return packageDeps.getExitingFiles(possibleFiles)
   }).then(function (testFiles) {
@@ -24,6 +24,14 @@ function packageDeps (file, packageFile) {
   }).then(function (pkgDeps) {
     results.pkgDeps = pkgDeps
     return results
+  })
+}
+
+packageDeps.deps = function () {
+  var args = _.values(arguments)
+  return packageDeps.apply(null, args)
+  .then(function (results) {
+    return results.pkgDeps
   })
 }
 
@@ -119,6 +127,7 @@ packageDeps.designateDeps = function (deps, devDeps, pkg) {
   var missingDevDeps = _.difference(devDeps.npm, allDeps)
   if (missingDevDeps.length > 1) throw new Error('missing devDependencies: ' + missingDevDeps.join(', ') + '.')
   if (missingDevDeps.length === 1) throw new Error('missing devDependency: ' + missingDevDeps.join(', ') + '.')
+  if (!_.size(result.devDependencies)) delete result.devDependencies
   return result
 }
 

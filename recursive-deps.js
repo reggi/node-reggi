@@ -98,6 +98,7 @@ recursiveDeps._groupTypes = function (flattenedDeps) {
   if (!deps.local) deps.local = []
   if (!deps.npm) deps.npm = []
   if (!deps.native) deps.native = []
+  if (!deps.invalid) deps.invalid = []
   return deps
 }
 

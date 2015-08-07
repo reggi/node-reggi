@@ -30,7 +30,7 @@
     "data.task": "^3.0.0",
     "debug": "^2.2.0",
     "dotty": "0.0.2",
-    "fs-extra": "reggi/node-fs-extra",
+    "fs-extra": "reggi/node-fs-extra#enhanced",
     "graceful-fs": "^4.1.2",
     "jsdoctest": "^1.6.0",
     "lodash": "^3.10.0",
