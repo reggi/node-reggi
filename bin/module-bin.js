@@ -5,13 +5,26 @@ var argv = minimist(process.argv.slice(2))
 var moduleBin = require('../module-bin')
 var pkg = require('../package.json')
 
+var filePath = (argv.file) ? argv.file : argv._.shift()
+var args = argv._
+
 if (argv.v || argv.version) {
   console.log(pkg.version)
-} else if (argv.h || argv.help) {
+} else if (filePath) {
+  moduleBin(
+    filePath,
+    args,
+    argv['method'],
+    argv['type'],
+    argv['log'],
+    argv['throw'],
+    argv['stringify']
+  )
+} else {
   console.log('module-bin - Run a module from the command line.')
   console.log('')
   console.log('Usage:')
-  console.log('  module-bin <main-file> [args^]               Build module.')
+  console.log('  module-bin <file> [args^]               Build module.')
   console.log('  module-bin --help | -h                       Shows this help message.')
   console.log('  module-bin --version | -v                    Show package version.')
   console.log('Options:')
@@ -22,19 +35,4 @@ if (argv.v || argv.version) {
   console.log('  --log          Allows you to specify whether or not to log result (default true).')
   console.log('  --stringify    Allows you to specify whether or not to json.stringfy log result (default true).')
   console.log('')
-} else {
-
-  var filePath = (argv.file) ? argv.file : argv._.shift()
-  var args = argv._
-
-  moduleBin(
-    filePath,
-    args,
-    argv['method'],
-    argv['type'],
-    argv['log'],
-    argv['throw'],
-    argv['stringify']
-  )
-
 }
