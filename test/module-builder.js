@@ -6,7 +6,7 @@ var path = require('path')
 var Promise = require('bluebird')
 var fse = Promise.promisifyAll(require('fs-extra'))
 var fs = require('fs')
-var npmBuildModule = require('../npm-build-module')
+var npmBuildModule = require('../module-builder')
 var CWD = process.cwd()
 
 /* global describe, it, before, beforeEach, after, afterEach */
