@@ -1,84 +1,88 @@
-var _ = require('lodash')
 var path = require('path')
+var _ = require('lodash')
 var Promise = require('bluebird')
 var acorn = require('acorn')
 var umd = require('acorn-umd')
 var fs = Promise.promisifyAll(require('fs'))
 var arrExtract = require('./arr-extract')
 
+var NATIVES
+var LREGEX
+var FREGEX
+var ACORNOPTS
+var UMDOPTS
+
 function recursiveDeps (srcpath, localRegex, filterRegex, acornParseOptions, umdOptions, natives) {
-  natives = (natives || Object.keys(process.binding('natives')))
-  localRegex = (localRegex || /^.\.\/|^.\/|^\//)
-  filterRegex = (filterRegex || /\.json$/)
-  acornParseOptions = (acornParseOptions || {sourceType: 'module', ecmaVersion: 6, allowHashBang: true})
-  umdOptions = (umdOptions || {es6: true, amd: true, cjs: true})
+  NATIVES = (natives || Object.keys(process.binding('natives')))
+  LREGEX = (localRegex || /^.\.\/|^.\/|^\//)
+  FREGEX = (filterRegex || /\.json$/)
+  ACORNOPTS = (acornParseOptions || {sourceType: 'module', ecmaVersion: 6, allowHashBang: true})
+  UMDOPTS = (umdOptions || {es6: true, amd: true, cjs: true})
+  return recursiveDeps.getChildren(srcpath)
+}
 
-  var src = path.parse(srcpath)
-  src.orignal = srcpath
+recursiveDeps.depsFormat = function (childDeps, parentDep, rootDep) {
+  return _.chain([childDeps])
+  .flattenDeep()
+  .map(recursiveDeps.depClense)
+  .without(false)
+  .map(function (dep) {
+    dep.original = path.format(dep)
+    dep.isRoot = (rootDep === true)
+    dep.parent = (parentDep) ? path.join(parentDep.parent, parentDep.dir) : '.'
+    dep.type = (dep.isRoot) ? 'root' : recursiveDeps.depType(dep.original)
+    dep.base = (dep.type === 'local' && dep.ext === '' && rootDep && rootDep.ext) ? dep.name + rootDep.ext : dep.base
+    dep.ext = (dep.type === 'local' && dep.ext === '' && rootDep && rootDep.ext) ? rootDep.ext : dep.ext
+    dep.relative = _.clone(dep)
+    dep.relative.dir = (dep.type === 'local' || dep.type === 'root') ? path.join(dep.parent, dep.dir) : dep.dir
+    dep.relative = (dep.relative.dir) ? path.join(path.format(dep.relative)) : dep.original
+    dep.traverse = (dep.type === 'local' || dep.type === 'root')
+    dep.children = []
+    return dep
+  })
+  .value()
+}
 
-  function depType (dep) {
-    if (dep.match(filterRegex)) return 'invalid'
-    if (dep.match(localRegex)) return 'local'
-    if (_.contains(natives, dep)) return 'native'
-    return 'npm'
-  }
+recursiveDeps.depType = function (dep, natives, localRegex, filterRegex) {
+  natives = (NATIVES || natives || Object.keys(process.binding('natives')))
+  localRegex = (LREGEX || localRegex || /^.\.\/|^.\/|^\//)
+  filterRegex = (FREGEX || filterRegex || /\.json$/)
+  if (dep.match(filterRegex)) return 'invalid'
+  if (dep.match(localRegex)) return 'local'
+  if (_.contains(natives, dep)) return 'native'
+  return 'npm'
+}
 
-  function depClense (dep) {
-    if (typeof dep === 'string') return dep
-    if (dep && dep.source && dep.source.value) return dep.source.value
-    if (dep && dep.source && !dep.source.value) return false
-    return path.format(dep)
-  }
+recursiveDeps.depClense = function (dep) {
+  if (typeof dep === 'string') return path.parse(dep)
+  if (dep && dep.source && dep.source.value) return path.parse(dep.source.value)
+  if (dep && dep.source && !dep.source.value) return false
+  if (typeof dep === 'object' && (dep.base || dep.dir)) return path.parse(path.format(dep))
+  return false
+}
 
-  function depsFormat (deps, parent) {
-    return _.chain([deps])
-    .flatten()
-    .map(function (dep) {
-      dep = depClense(dep)
-      if (!dep) return false
-      var temp = {}
-      temp.original = dep
-      temp.isRoot = (dep === src.orignal)
-      temp.parent = (temp.isRoot) ? '.' : parent
-      temp.type = (temp.isRoot) ? 'root' : depType(dep)
-      temp.path = path.parse(dep)
-      if ((temp.type === 'local' || temp.type === 'root') && temp.path.ext === '') {
-        temp.path.base = temp.path.base + src.ext
-      }
-      temp.path.format = path.format(temp.path)
-      temp.relativePath = _.cloneDeep(temp.path)
-      if (temp.type === 'local') temp.relativePath.dir = path.join(temp.parent, temp.relativePath.dir)
-      temp.relativePath.format = path.format(temp.relativePath)
-      temp.traverse = (temp.type === 'local' || temp.type === 'root')
-      temp.children = []
-      return temp
-    })
-    .without(false)
-    .value()
-  }
-
-  function getChildren (deps) {
-    function _getChildren (_deps) {
-      return Promise.map(_deps, function (dep) {
-        if (!dep.traverse) return true
-        if (!dep.children) return true
-        return fs.readFileAsync(dep.relativePath.format, 'utf8').then(function (content) {
-          var ast = acorn.parse(content, acornParseOptions)
-          var rawDeps = umd(ast, umdOptions)
-          dep.children = depsFormat(rawDeps, path.join(dep.parent, dep.path.dir))
-          return _getChildren(dep.children)
-        })
+recursiveDeps.getChildren = function (rootDeps, acornParseOptions, umdOptions) {
+  acornParseOptions = (ACORNOPTS || acornParseOptions || {sourceType: 'module', ecmaVersion: 6, allowHashBang: true})
+  umdOptions = (UMDOPTS || umdOptions || {es6: true, amd: true, cjs: true})
+  function _getChildren (parentDeps, rootDep) {
+    return Promise.map(parentDeps, function (parentDep) {
+      if (!parentDep.traverse) return true
+      if (!parentDep.children) return true
+      return fs.readFileAsync(parentDep.relative, 'utf8').then(function (content) {
+        var ast = acorn.parse(content, acornParseOptions)
+        var deps = umd(ast, umdOptions)
+        parentDep.children = recursiveDeps.depsFormat(deps, parentDep, rootDep)
+        return _getChildren(parentDep.children, rootDep)
       })
-    }
-    deps = depsFormat(deps)
-    return _getChildren(deps).then(function () {
-      // console.log(JSON.stringify(deps, null, 2))
-      return deps
     })
   }
-
-  return getChildren(src)
-
+  rootDeps = _.flatten([rootDeps])
+  return Promise.map(rootDeps, function (rootDep) {
+    rootDep = recursiveDeps.depsFormat(rootDep, false, true)
+    return _getChildren(rootDep, rootDep[0]).then(function () {
+      return rootDep
+    })
+  }).then(_.flatten)
 }
 
 recursiveDeps._flatten = function (rawDeps) {
@@ -86,7 +90,7 @@ recursiveDeps._flatten = function (rawDeps) {
 }
 
 recursiveDeps._unique = function (flattenedDeps) {
-  return _.uniq(flattenedDeps, 'relativePath.format')
+  return _.uniq(flattenedDeps, 'relative')
 }
 
 recursiveDeps._groupTypes = function (flattenedDeps) {
@@ -108,7 +112,7 @@ recursiveDeps._mapAuthoredPaths = function (groupedDeps) {
 recursiveDeps._mapRelativePaths = function (groupedDeps) {
   return _.mapValues(groupedDeps, function (deps) {
     return _.map(deps, function (dep) {
-      return dep.relativePath.format
+      return dep.relative
     })
   })
 }

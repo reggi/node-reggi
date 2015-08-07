@@ -1,12 +1,22 @@
 #!/usr/bin/env node
 
 var minimist = require('minimist')
+var _ = require('lodash')
 var argv = minimist(process.argv.slice(2))
 var moduleBin = require('../module-bin')
 var pkg = require('../package.json')
 
 var filePath = (argv.file) ? argv.file : argv._.shift()
 var args = argv._
+
+args = _.map(args, function (arg) {
+  try {
+    return global['eval'](arg)
+  } catch (e) {
+    arg = "'" + arg + "'"
+    return global['eval'](arg)
+  }
+})
 
 if (argv.v || argv.version) {
   console.log(pkg.version)

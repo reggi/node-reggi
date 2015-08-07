@@ -1,61 +1,125 @@
-var _ = require('underscore')
+var path = require('path')
+var _ = require('lodash')
 var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs'))
 var recursiveDeps = require('./recursive-deps')
 
-function packageDeps (mainFile, testFiles, packageFile) {
-  testFiles = (testFiles) ? _.flatten([testFiles]) : [] // force into array
-  return Promise.props({
-    'package': fs.readFileAsync(packageFile, 'utf8').then(JSON.parse),
-    'mainDeps': recursiveDeps.mapRelativePaths(mainFile),
-    'testDeps': Promise.map(testFiles, function (testFile) {
-      return recursiveDeps.mapRelativePaths(testFile)
-    }).then(function (depSets) {
-      return _.mapObject(depSets[0], function (set, key) {
-        var result = _.chain(depSets)
-        .map(function (dep) {
-          return _.chain(dep)
-          .pick(key)
-          .values()
-          .value()
-        })
-        .value()
-        return _.flatten(result)
-      })
-    })
+function packageDeps (file, packageFile) {
+  var results = {}
+  return recursiveDeps.mapRelativePaths(file)
+  .then(function (deps) {
+    results.deps = deps
+    var scan = _.flatten([deps.local, deps.root])
+    var possibleFiles = packageDeps.possibleTestFiles(scan)
+    return packageDeps.getExitingFiles(possibleFiles)
+  }).then(function (testFiles) {
+    results.testFiles = testFiles
+    return recursiveDeps.mapRelativePaths(testFiles)
+  }).then(function (devDeps) {
+    results.devDeps = devDeps
+    return fs.readFileAsync(packageFile, 'utf8').then(JSON.parse)
+  }).then(function (pkg) {
+    results.package = pkg
+    return packageDeps.designateDeps(results.deps, results.devDeps, results.package)
+  }).then(function (pkgDeps) {
+    results.pkgDeps = pkgDeps
+    return results
   })
-  .then(function (data) {
-    data.dependencies = _.chain(data.mainDeps.npm)
-    .map(function (dep) {
-      if (data.package.dependencies[dep]) return [dep, data.package.dependencies[dep]]
+}
+
+packageDeps.getExitingFiles = function (files) {
+  return Promise.map(files, function (file) {
+    return fs.lstatAsync(file).then(function (exists) {
+      return file
+    }).catch(function () {
       return false
     })
-    .without(false)
-    .object()
-    .value()
-    var missingDeps = _.difference(data.mainDeps.npm, _.keys(data.dependencies))
-    if (missingDeps.length > 1) throw new Error('missing dependencies: ' + missingDeps.join(', ') + '.')
-    if (missingDeps.length === 1) throw new Error('missing dependency: ' + missingDeps.join(', ') + '.')
-
-    data.devDependencies = _.chain(data.testDeps.npm)
-    .filter(function (dep) {
-      return !_.contains(_.keys(data.dependencies), dep)
-    })
-    .map(function (dep) {
-      if (data.package.devDependencies[dep]) return [dep, data.package.devDependencies[dep]]
-      if (data.package.dependencies[dep]) return [dep, data.package.dependencies[dep]]
-      return false
-    })
-    .without(false)
-    .object()
-    .value()
-
-    var allDeps = _.flatten([_.keys(data.devDependencies), _.keys(data.dependencies)])
-    var missingDevDeps = _.difference(data.testDeps.npm, allDeps)
-    if (missingDevDeps.length > 1) throw new Error('missing devDependencies: ' + missingDevDeps.join(', ') + '.')
-    if (missingDevDeps.length === 1) throw new Error('missing devDependency: ' + missingDevDeps.join(', ') + '.')
-    return data
   })
+  .then(_)
+  .call('chain')
+  .call('unique')
+  .call('without', false)
+  .call('value')
+}
+
+/** given an array of files, creates array of possible test file localtions */
+packageDeps.possibleTestFiles = function (files) {
+  return _.chain([files])
+  .flatten()
+  .map(function (file) {
+    var parse = path.parse(file)
+    var format = path.format(parse)
+    return [
+      path.join('./test/', file),
+      path.join('./test/', format),
+      path.join('./test/', parse.base),
+      path.join('./test/', 'test.' + parse.name + parse.ext),
+      path.join('./test/', 'test-' + parse.name + parse.ext),
+      path.join('./test/', 'test_' + parse.name + parse.ext),
+      path.join('./test/', parse.name + '.test' + parse.ext),
+      path.join('./test/', parse.name + '-test' + parse.ext),
+      path.join('./test/', parse.name + '_test' + parse.ext),
+      path.join('./test/', parse.dir, 'test.' + parse.name + parse.ext),
+      path.join('./test/', parse.dir, 'test-' + parse.name + parse.ext),
+      path.join('./test/', parse.dir, 'test_' + parse.name + parse.ext),
+      path.join('./test/', parse.dir, parse.name + '.test' + parse.ext),
+      path.join('./test/', parse.dir, parse.name + '-test' + parse.ext),
+      path.join('./test/', parse.dir, parse.name + '_test' + parse.ext),
+      path.join('./tests/', file),
+      path.join('./tests/', format),
+      path.join('./tests/', parse.base),
+      path.join('./tests/', 'test.' + parse.name + parse.ext),
+      path.join('./tests/', 'test-' + parse.name + parse.ext),
+      path.join('./tests/', 'test_' + parse.name + parse.ext),
+      path.join('./tests/', parse.name + '.test' + parse.ext),
+      path.join('./tests/', parse.name + '-test' + parse.ext),
+      path.join('./tests/', parse.name + '_test' + parse.ext),
+      path.join('./tests/', parse.dir, 'test.' + parse.name + parse.ext),
+      path.join('./tests/', parse.dir, 'test-' + parse.name + parse.ext),
+      path.join('./tests/', parse.dir, 'test_' + parse.name + parse.ext),
+      path.join('./tests/', parse.dir, parse.name + '.test' + parse.ext),
+      path.join('./tests/', parse.dir, parse.name + '-test' + parse.ext),
+      path.join('./tests/', parse.dir, parse.name + '_test' + parse.ext)
+    ]
+  })
+  .flatten()
+  .value()
+}
+
+packageDeps.designateDeps = function (deps, devDeps, pkg) {
+  var result = {}
+
+  // get the deps
+  result.dependencies = _.chain(deps.npm)
+  .map(function (dep) {
+    if (pkg.dependencies[dep]) return [dep, pkg.dependencies[dep]]
+    return false
+  })
+  .without(false)
+  .object()
+  .value()
+  var missingDeps = _.difference(deps.npm, _.keys(result.dependencies))
+  if (missingDeps.length > 1) throw new Error('missing dependencies: ' + missingDeps.join(', ') + '.')
+  if (missingDeps.length === 1) throw new Error('missing dependency: ' + missingDeps.join(', ') + '.')
+
+  // get the dev deps
+  result.devDependencies = _.chain(devDeps.npm)
+  .filter(function (dep) {
+    return !_.contains(_.keys(result.dependencies), dep)
+  })
+  .map(function (dep) {
+    if (pkg.devDependencies[dep]) return [dep, pkg.devDependencies[dep]]
+    if (pkg.dependencies[dep]) return [dep, pkg.dependencies[dep]]
+    return false
+  })
+  .without(false)
+  .object()
+  .value()
+  var allDeps = _.flatten([_.keys(result.devDependencies), _.keys(result.dependencies)])
+  var missingDevDeps = _.difference(devDeps.npm, allDeps)
+  if (missingDevDeps.length > 1) throw new Error('missing devDependencies: ' + missingDevDeps.join(', ') + '.')
+  if (missingDevDeps.length === 1) throw new Error('missing devDependency: ' + missingDevDeps.join(', ') + '.')
+  return result
 }
 
 module.exports = packageDeps

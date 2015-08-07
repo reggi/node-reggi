@@ -33,3 +33,20 @@ The question I wanted to address was "What if there was no overhead?".
 
 * bin only
 * ensureLink && ensureSymlink not to create dirs
+
+## Flow
+
+* get deps for main file -> [file, deps]
+* get all tests for local deps -> [deps.local, possibleTestFiles]
+  * ./test/{filename}.test.{exttname}
+  * ./test/{dirname}/{filename}.test.{exttname}
+  * ./test/{filename}.{exttname}
+  * ./test/{dirname}/{filename}.{exttname}
+* check existence of possible test files [possibleTestFiles, testFiles]
+  * if any tests exist append tests dir to link list [testfiles.length link.push([paths.test, paths.testDst])]
+  * if test existing files append to link list [testFiles.length, link.concat(testFiles)]
+
+```
+./bin/module-bin.js ./recursive-deps.js '["./recursive-deps.js", "./bin/module-bin.js"]' --type=promise --method=mapRelativePaths
+./bin/module-bin.js ./recursive-deps.js ./recursive-deps.js --type=promise --method=mapRelativePaths
+```

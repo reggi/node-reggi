@@ -1,0 +1,25 @@
+{
+  "name": "module-builder",
+  "main": "module-builder.js",
+  "bin": "bin/module-builder.js",
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "dotty": "0.0.2",
+    "debug": "^2.2.0",
+    "lodash": "^3.10.0",
+    "ramda": "^0.17.1",
+    "bluebird": "^2.9.34",
+    "fs-extra": "reggi/node-fs-extra",
+    "acorn": "^2.1.0",
+    "acorn-umd": "^0.4.0"
+  },
+  "devDependencies": {
+    "js-yaml": "^3.3.1",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "underscore": "^1.8.3"
+  }
+}

@@ -99,15 +99,15 @@ describe('package-deps', function () {
 
   var tests = {
     'success': [
-      [['./file-with-local.js', false, './package.json'], {
+      [['./file-with-local.js', './package.json'], {
         dependencies: ['underscore', 'bluebird', 'ramda'],
         devDependencies: []
       }],
-      [['./file-without-local.js', false, './package.json'], {
+      [['./file-without-local.js', './package.json'], {
         dependencies: ['underscore', 'bluebird'],
         devDependencies: []
       }],
-      [['./local-dep.js', false, './package.json'], {
+      [['./local-dep.js', './package.json'], {
         dependencies: ['ramda'],
         devDependencies: []
       }]

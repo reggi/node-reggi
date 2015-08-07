@@ -7,11 +7,14 @@ var os = require('os')
 var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs-extra'))
 var recursiveDeps = require('../recursive-deps')
-var yaml = require('js-yaml')
-var ymlTests = fs.readFileSync(path.join(__dirname, './recursive-deps-tests.yml'), 'utf8')
-var tests = yaml.safeLoad(ymlTests)
-var ymlFiles = fs.readFileSync(path.join(__dirname, './recursive-deps-files.yml'), 'utf8')
-var files = yaml.safeLoad(ymlFiles)
+// var yaml = require('js-yaml')
+// var ymlTests = fs.readFileSync(path.join(__dirname, './recursive-deps-tests.yml'), 'utf8')
+// var tests = yaml.safeLoad(ymlTests)
+// var ymlFiles = fs.readFileSync(path.join(__dirname, './recursive-deps-files.yml'), 'utf8')
+// var files = yaml.safeLoad(ymlFiles)
+var tests = require('./recursive-deps-tests.json')
+var files = require('./recursive-deps-files.json')
+//
 
 /* global describe, before, after, beforeEach, afterEach, it */
 

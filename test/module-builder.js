@@ -11,9 +11,9 @@ var CWD = process.cwd()
 
 /* global describe, it, before, beforeEach, after, afterEach */
 
-var TEST_DIR = path.join(os.tmpdir(), 'package-deps')
+var TEST_DIR = path.join(os.tmpdir(), 'module-builder')
 
-describe('package-deps', function () {
+describe('module-builder', function () {
 
   before(function () {
     fse.emptyDirSync(TEST_DIR)
@@ -149,8 +149,8 @@ describe('package-deps', function () {
 
   var tests = [
     ['./file-with-local.js', {
-      test: true,
-      docs: true,
+      test: false,
+      docs: false,
       localDependencies: ['./local-dep.js'],
       localDevDependencies: [],
       dependencies: ['underscore', 'bluebird', 'ramda'],
