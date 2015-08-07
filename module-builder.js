@@ -29,7 +29,7 @@ function debugThen () {
  * @param  {string} packagesDir the path of the new packages direcotry
  * @param  {string} readmeName  the name for readme files
  */
-module.exports = function (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, binOnly, readmeName) {
+module.exports = function (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName) {
   if (!localDir) localDir = path.join('local_modules')
   if (!docsDir) docsDir = path.join('docs')
   if (!testDir) testDir = path.join('test')

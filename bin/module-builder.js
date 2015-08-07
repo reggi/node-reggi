@@ -11,30 +11,29 @@ if (argv.v || argv.version) {
 } else if (mainFile) {
   npmBuildModule(
     mainFile,
-    argv['module-name'],
-    argv['test-dir'],
-    argv['docs-dir'],
-    argv['local-dir'],
-    argv['packages-dir'],
-    argv['bin-dir'],
-    argv['bin-only'],
-    argv['readme-name']
+    argv['name'],
+    argv['test'],
+    argv['docs'],
+    argv['local'],
+    argv['packages'],
+    argv['bin'],
+    argv['readme']
   )
 } else {
-  console.log('npm-build-module - Build npm module from file')
+  console.log('module-builder - Build npm module from file')
   console.log('')
   console.log('Usage:')
-  console.log('  npm-build-module <file>                            Build module.')
-  console.log('  npm-build-module --help | -h                       Shows this help message.')
-  console.log('  npm-build-module --version | -v                    Show package version.')
+  console.log('  module-builder <file>                            Build module.')
+  console.log('  module-builder --help | -h                       Shows this help message.')
+  console.log('  module-builder --version | -v                    Show package version.')
   console.log('Options:')
   console.log('  --file           The javascript file to build into module.')
-  console.log('  --module-name    The name of the new module.')
-  console.log('  --test-dir       The path of the test directory.')
-  console.log('  --docs-dir       The path of the docs directory.')
-  console.log('  --local-dir      The path of the new local modules direcotry.')
-  console.log('  --packages-dir   The path of the new packages direcotry.')
-  console.log('  --bin-dir        The path of bin file direcotry.')
-  console.log('  --readme-name    The name for readme files.')
+  console.log('  --name           The name of the new module.')
+  console.log('  --test           The path of the test directory.')
+  console.log('  --docs           The path of the docs directory.')
+  console.log('  --local          The path of the new local modules direcotry.')
+  console.log('  --packages       The path of the new packages direcotry.')
+  console.log('  --bin            The path of bin file direcotry.')
+  console.log('  --readme         The name for readme files.')
   console.log('')
 }
