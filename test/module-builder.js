@@ -21,6 +21,14 @@ describe(DESC, function () {
       var moduleName = path.basename(project.root, path.extname(project.root))
       return moduleBuilder(project.root).then(function () {
 
+        // used for some more scoping to see the dir tree itself, hoping for node alternative
+        // http://stackoverflow.com/questions/31817199/visual-filesystem-directory-tree-string
+        // var exec = require('child_process').exec
+        // exec('tree', function (error, stdout, stderr) {
+        //   console.log('stdout: ' + stdout)
+        // })
+        // console.log(fs.readdirSync('./'))
+
         var paths = [
           [path.join('./local_modules'), 'isDirectory'],
           [path.join('./local_modules', moduleName), 'isDirectory'],
@@ -38,7 +46,8 @@ describe(DESC, function () {
         var deps = (project.deps) ? project.deps : []
         var devDeps = (project.devDeps) ? project.devDeps : []
         var expectedPkg = fauxProject.package(deps, devDeps)
-        if(!pkg.devDependencies) pkg.devDependencies = {}
+        // console.log(pkg)
+        // console.log(expectedPkg)
         assert.deepEqual(pkg.dependencies, expectedPkg.dependencies)
         assert.deepEqual(pkg.devDependencies, expectedPkg.devDependencies)
       })

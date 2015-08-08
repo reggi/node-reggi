@@ -16,7 +16,7 @@ function fauxProject (deps, devDeps, modules, tests, files) {
     var project = deps
     deps = (project.deps) ? project.deps : []
     devDeps = (project.devDeps) ? project.devDeps : []
-    modules = (project.modules) ? project.modules : {}
+    modules = (project.modules) ? _.cloneDeep(project.modules) : {}
     tests = (project.tests) ? project.tests : {}
     files = (project.files) ? project.files : {}
     _.extend(modules, project.tests)
@@ -42,8 +42,8 @@ fauxProject.package = function (deps, devDeps) {
   devDeps = (devDeps) ? _.flatten([devDeps]) : false
   var version = '^1.0.0'
   var obj = {}
-  if (deps) obj.dependencies = fauxProject.deps(deps, version)
-  if (devDeps) obj.devDependencies = fauxProject.deps(devDeps, version)
+  if (deps.length) obj.dependencies = fauxProject.deps(deps, version)
+  if (devDeps.length) obj.devDependencies = fauxProject.deps(devDeps, version)
   return obj
 }
 

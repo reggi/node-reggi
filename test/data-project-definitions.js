@@ -72,6 +72,34 @@ var tests = [
       './nineteen.js': ['./twenty.js'],
       './twenty.js': ['underscore']
     }
+  },
+  {
+    'deps': ['underscore'],
+    'root': './twentyone.js',
+    'files': {
+      './docs/twentyone.md': []
+    },
+    'modules': {
+      './twentyone.js': ['./twentytwo.js'],
+      './twentytwo.js': ['./twentythree.js'],
+      './twentythree.js': ['underscore']
+    }
+  },
+  {
+    'deps': ['underscore'],
+    'devDeps': ['lodash'],
+    'root': './twentyfour.js',
+    'files': {
+      './docs/twentyfour.md': []
+    },
+    'tests': {
+      './test/twentyfour.js': ['lodash']
+    },
+    'modules': {
+      './twentyfour.js': ['./twentyfive.js'],
+      './twentyfive.js': ['./twentysix.js'],
+      './twentysix.js': ['underscore']
+    }
   }
 ]
 
