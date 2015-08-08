@@ -1,6 +1,7 @@
 {
   "name": "module-harvest",
   "main": "module-harvest.js",
+  "version": "0.0.1",
   "bin": "bin/module-harvest.js",
   "scripts": {
     "test": "standard && mocha"

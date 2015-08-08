@@ -29,6 +29,9 @@ The question I wanted to address was "What if there was no overhead?".
 * `autoGithubRepo` feature
 * `repoBackup` feature
 * Cake in es6 support
+* add common .gitignore to built modules
+  * npm-debug.log
+  * node_modules
 
 ## Flow
 

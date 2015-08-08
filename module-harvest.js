@@ -65,6 +65,7 @@ function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packag
     var modulePackage = {}
     modulePackage.name = paths.name
     modulePackage.main = paths.main
+    modulePackage.version = '0.0.1'
     if (results.binExists) modulePackage.bin = paths.bin
     if (results.testFiles.length && dotty.exists(results, 'package.scripts.test')) dotty.put(modulePackage, 'scripts.test', results.package.scripts.test)
     if (results.package.author) modulePackage.author = results.package.author
