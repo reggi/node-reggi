@@ -80,7 +80,7 @@ thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ remote add ori
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ push origin master
 ```
 
-Then it seems the only way to continue is to remove the new module and clone it again. with `gits attach`.
+Then it seems the only way to continue is to remove the new module and clone it again with `gits attach`.
 
 ```bash
 $$

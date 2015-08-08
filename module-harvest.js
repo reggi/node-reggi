@@ -7,34 +7,28 @@ var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs-extra'))
 var packageDeps = require('./package-deps')
 var promisePropsSeries = require('./promise-props-series')
+var githubCreateRepo = require('./github-create-repo')
+var git = require('simple-git')
 
 /**
  * Build a module from file.
  * Tracks down package dependencies, and local, main, and bin files.
- * @param  {string} mainFile    Path to the main javascript file.
- * @param  {string} moduleName  Name of the module.
- * @param  {string} testDir     Directory where all the tests are stored.
- * @param  {string} docsDir     Directory where all the docs are stored.
- * @param  {string} localDir    Directory where built modules are stored.
- * @param  {string} packagesDir Directory where backup package.json files go.
- * @param  {string} binDir      Directory where the bin files are stored.
- * @param  {string} readmeName  Name of readme files generated in built module (readme.md).
- * @param  {string} packageFile Path of parent pacakge.json file.
+ * @param  {string} moduleFile               Path to the main javascript file.
+ * @param  {string} moduleName             Name of the module.
+ * @param  {string} testDir                Directory where all the tests are stored.
+ * @param  {string} docsDir                Directory where all the docs are stored.
+ * @param  {string} localDir               Directory where built modules are stored.
+ * @param  {string} packagesDir            Directory where backup package.json files go.
+ * @param  {string} binDir                 Directory where the bin files are stored.
+ * @param  {string} readmeName             Name of readme files generated in built module (readme.md).
+ * @param  {string} packageFile            Path of parent pacakge.json file.
+ * @param  {string} githubAccessToken      Path of parent pacakge.json file.
  */
-function moduleHarvest (
-  mainFile,
-  moduleName,
-  testDir,
-  docsDir,
-  localDir,
-  packagesDir,
-  binDir,
-  readmeName,
-  packageFile
-  ) {
+
+function moduleHarvest (moduleFile, moduleName, packageDesc, testDir, docsDir, localDir, binDir, packagesDir, packageFile, readmeName, githubAccessToken, githubRepoPrefix) {
   var paths = {}
-  paths.main = path.join(mainFile)
-  paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(mainFile, path.extname(mainFile)))
+  paths.main = path.join(moduleFile)
+  paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(moduleFile, path.extname(moduleFile)))
   paths.testDir = (testDir) ? testDir : path.join('test')
   paths.docsDir = (docsDir) ? docsDir : path.join('docs')
   paths.localModulesDir = (localDir) ? localDir : path.join('local_modules')
@@ -56,7 +50,8 @@ function moduleHarvest (
   .then(function (results) {
     return Promise.props({
       'readmeExists': fs.lstatAsync(paths.readme).then(R.T, R.F),
-      'binExists': fs.lstatAsync(paths.bin).then(R.T, R.F)
+      'binExists': fs.lstatAsync(paths.bin).then(R.T, R.F),
+      'moduleExists': fs.lstatAsync(paths.localModulesDirDst).then(R.T, R.F)
     }).then(function (props) {
       return _.extend(results, props)
     })
@@ -77,6 +72,7 @@ function moduleHarvest (
     modulePackage.name = paths.name
     modulePackage.main = paths.main
     modulePackage.version = '0.0.1'
+    if (packageDesc) modulePackage.description = packageDesc
     if (results.binExists) modulePackage.bin = paths.bin
     if (results.testFiles.length && dotty.exists(results, 'package.scripts.test')) dotty.put(modulePackage, 'scripts.test', results.package.scripts.test)
     if (results.package.author) modulePackage.author = results.package.author
@@ -102,6 +98,22 @@ function moduleHarvest (
         return fs.ensureLinkAsync(paths.readmeSrc, paths.readmeDst)
           .then(moduleHarvest.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
           .catch(moduleHarvest.debugCatch)
+      },
+      'github': function () {
+        if (results.moduleExists) return false
+        if (!githubAccessToken) return false
+        var githubRepo = (githubRepoPrefix) ? githubRepoPrefix + paths.name : paths.name
+        return githubCreateRepo(githubAccessToken, githubRepo, packageDesc)
+        .then(function (repo) {
+          var url = repo[0].clone_url
+          debug("github repo created %s", url)
+          return git(paths.localModulesDirDst)
+          .init()
+          .add('./*')
+          .commit('init')
+          .addRemote('origin', url)
+          .push('origin', 'master')
+        })
       }
     })
   })

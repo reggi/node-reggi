@@ -9,7 +9,7 @@ function promisePropsSeries (props) {
   })
   return Promise.reduce(_.values(props), function (result, action) {
     if (typeof action !== 'function') throw new Error('property values must be functions')
-    return action().then(function (value) {
+    return Promise.resolve(action()).then(function (value) {
       results[action.key] = value
     })
   }, null)

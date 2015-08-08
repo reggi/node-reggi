@@ -1,0 +1,11 @@
+{
+  "name": "jsdoc2md-async",
+  "main": "jsdoc2md-async.js",
+  "version": "0.0.1",
+  "description": "Promise that returns parsed markdown from jsdoc.",
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "bluebird": "^2.9.34",
+    "jsdoc-to-markdown": "^1.1.1"
+  }
+}

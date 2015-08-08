@@ -2,6 +2,7 @@
   "name": "arr-camelize",
   "main": "arr-camelize.js",
   "version": "0.0.1",
+  "description": "Camelize the contents of an array.",
   "scripts": {
     "test": "standard && mocha"
   },
