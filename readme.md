@@ -18,32 +18,18 @@ Here's a great quote from [`substack`](http://substack.net/how_I_write_modules).
 
 The question I wanted to address was "What if there was no overhead?".
 
-## Todo
+## Todo (module-harvest)
 
-* Writing Documentation
-  * JSDoc Validation
-* Building Documentation, Watch script
-* Building Modules, Watch script
-* Building Bin Files
-* `autoGitInit` feature
-* `autoGithubRepo` feature
-* `repoBackup` feature
+* run jsdoc2md before harvests
 * Cake in es6 support
+  * if file in root dir is es6 auto bundle dist and src in module
 * add common .gitignore to built modules
-  * npm-debug.log
-  * node_modules
-
-## Flow
-
-* get deps for main file -> [file, deps]
-* get all tests for local deps -> [deps.local, possibleTestFiles]
-  * ./test/{filename}.test.{exttname}
-  * ./test/{dirname}/{filename}.test.{exttname}
-  * ./test/{filename}.{exttname}
-  * ./test/{dirname}/{filename}.{exttname}
-* check existence of possible test files [possibleTestFiles, testFiles]
-  * if any tests exist append tests dir to link list [testfiles.length link.push([paths.test, paths.testDst])]
-  * if test existing files append to link list [testFiles.length, link.concat(testFiles)]
+  * `npm-debug.log`
+  * `node_modules`
+* add `test` and `doc` dirs to possible search
+* havesting watch script
+  * remove unused deps from module
+  * add new deps to module 
 
 ```
 ./bin/module-bin.js ./recursive-deps.js '["./recursive-deps.js", "./bin/module-bin.js"]' --type=promise --method=mapRelativePaths
