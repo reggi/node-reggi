@@ -90,3 +90,35 @@ Cloning into 'local_modules/module-bin'...
 ```
 
 At the end of all this, you have a `slave` repo to the `superproject` and evey thing is in-sync.
+
+### Gitslave + Module Harvest
+
+I've created this super-project [`reggi/node-reggi`](https://github.com/reggi/node-reggi) which contains javascript files.
+
+Consequently, one of these files is called `./module-harvest.js`, it's executable counterpart `./bin/module-harvest.js` takes a javascript file as an argument and will build that file into a proper npm javascript module by tracking down it's dependencies and building a `package.json` file. When `module-harvest` consumes itself in the case of running the following command.
+
+```
+./bin/module-harvest.js ./module-harvest.js --desc=':corn: Harvests package dependencies and builds module from file.'`
+```
+
+This command creates the module `./local_modules/module-harvest`.
+
+If you have a `harvest.json` file present in the working directory, as I do, and it contains a github access token / prefix, the command will also create the repo and commit it to github. (these options can also be added to the command)
+
+Here it is:
+
+[https://github.com/reggi/node-module-harvest](https://github.com/reggi/node-module-harvest)
+
+Now if you run the following its up on npm.
+
+```
+cd ./local_modules/module
+npm publish
+```
+
+And it seems that if I want it to be apparent of `gitslave` for the project that I need to do this.
+
+```
+rm -rf ./local_modules/module-harvest.js
+gits attach https://github.com/reggi/node-module-harvest.js.git local_modules/module-harvest.js
+```

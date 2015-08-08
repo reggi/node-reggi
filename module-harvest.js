@@ -106,14 +106,24 @@ function moduleHarvest (moduleFile, moduleName, packageDesc, testDir, docsDir, l
         return githubCreateRepo(githubAccessToken, githubRepo, packageDesc)
         .then(function (repo) {
           var url = repo[0].clone_url
-          debug("github repo created %s", url)
+          debug('github repo created %s', url)
           return git(paths.localModulesDirDst)
           .init()
           .add('./*')
           .commit('init')
           .addRemote('origin', url)
           .push('origin', 'master')
+          .then(function () {
+            return repo
+          })
         })
+        // .then(function () {
+        //   return fs.removeAsync(paths.localModulesDirDst)
+        //   .then(function () {
+        //     var comand = util.format('gits attach %s %s', repo, paths.localModulesDirDst)
+        //     exec(command)
+        //   })
+        // })
       }
     })
   })
