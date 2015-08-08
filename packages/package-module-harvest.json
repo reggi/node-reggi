@@ -16,6 +16,8 @@
     "fs-extra": "reggi/node-fs-extra#enhanced",
     "acorn": "^2.1.0",
     "acorn-umd": "^0.4.0",
+    "octonode": "^0.7.1",
+    "simple-git": "^1.7.0",
     "minimist": "^1.1.2"
   }
 }
