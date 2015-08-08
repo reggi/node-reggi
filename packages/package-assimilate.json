@@ -1,0 +1,10 @@
+{
+  "name": "assimilate",
+  "main": "assimilate.js",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "author": "Thomas Reggi",
+  "dependencies": {}
+}

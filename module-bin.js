@@ -2,6 +2,16 @@ var util = require('util')
 var _ = require('lodash')
 var path = require('path')
 
+/**
+ * Proxy the execution of an entire node module.
+ * @param  {String} filePath         Path to main javascript file.
+ * @param  {Array} args              Array of arguments to apply to the function.
+ * @param  {String} [functionMethod] String of specific function method to execute
+ * @param  {String} [type]           Type of function to run (promise||callback)
+ * @param  {Boolean} [toLog]         Option to log the output (defaults true).
+ * @param  {Boolean} [toThrow]       Option to throw error (defaults true).
+ * @param  {Boolean} [toStringify]   Option to JSON.stringify output (defaults true).
+ */
 function moduleBin (filePath, args, functionMethod, type, toLog, toThrow, toStringify) {
   var cwd = process.cwd()
   toLog = (toLog) ? toLog : true

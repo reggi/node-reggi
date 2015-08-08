@@ -21,10 +21,17 @@ var promisePropsSeries = require('./promise-props-series')
  * @param  {string} readmeName  Name of readme files generated in built module (readme.md).
  * @param  {string} packageFile Path of parent pacakge.json file.
  */
-function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile) {
-  // if (typeof mainFile == )
-  // var argValues = _values(arguments)
-  // var argKeys = ['mainFile', 'moduleName', 'testDir', 'docsDir', 'localDir', 'packagesDir', 'binDir', 'readmeName', 'packageFile']
+function moduleHarvest (
+  mainFile,
+  moduleName,
+  testDir,
+  docsDir,
+  localDir,
+  packagesDir,
+  binDir,
+  readmeName,
+  packageFile
+  ) {
   var paths = {}
   paths.main = path.join(mainFile)
   paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(mainFile, path.extname(mainFile)))

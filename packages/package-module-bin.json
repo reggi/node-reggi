@@ -1,0 +1,17 @@
+{
+  "name": "module-bin",
+  "main": "module-bin.js",
+  "version": "0.0.1",
+  "bin": "bin/module-bin.js",
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "minimist": "^1.1.2"
+  },
+  "devDependencies": {
+    "bluebird": "^2.9.34"
+  }
+}
