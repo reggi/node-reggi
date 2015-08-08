@@ -60,12 +60,30 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
     return results
   })
   .then(function (results) {
-    return Promise.props({
-      'links': moduleBuilder.makeLinks(results.links, paths.localModulesDirDst),
-      'package': moduleBuilder.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage),
-      'symlinkModule': fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
+    // make links
+    var operations = {}
+    return moduleBuilder.makeLinks(results.links, paths.localModulesDirDst)
+    .then(function (links) {
+      operations.links = links
+      return operations
+    })
+    .then(function (operations) {
+      // make package
+      return moduleBuilder.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
+    })
+    .then(function (pkg) {
+      operations.package = pkg
+      return operations
+    })
+    .then(function (operations) {
+      // make symlinkModule
+      return fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
         .then(moduleBuilder.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
         .catch(moduleBuilder.debugCatch)
+    })
+    .then(function (symlinkModule) {
+      operations.symlinkModule = symlinkModule
+      return operations
     })
   })
 }

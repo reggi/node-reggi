@@ -3,8 +3,26 @@ var _ = require('lodash')
 var fs = require('fs-extra')
 
 /** creates a dummy project in the current directory */
-function fauxProject (packageArgs, modules) {
-  var pkg = fauxProject.package.apply(null, packageArgs)
+function fauxProject (deps, devDeps, modules, tests, files) {
+  if (Array.isArray(deps)) {
+    deps = (deps) ? deps : []
+    devDeps = (devDeps) ? devDeps : []
+    modules = (modules) ? modules : {}
+    tests = (tests) ? tests : {}
+    files = (files) ? files : {}
+    _.extend(modules, tests)
+    _.extend(modules, files)
+  } else {
+    var project = deps
+    deps = (project.deps) ? project.deps : []
+    devDeps = (project.devDeps) ? project.devDeps : []
+    modules = (project.modules) ? project.modules : {}
+    tests = (project.tests) ? project.tests : {}
+    files = (project.files) ? project.files : {}
+    _.extend(modules, project.tests)
+    _.extend(modules, project.files)
+  }
+  var pkg = fauxProject.package(deps, devDeps)
   fs.ensureFileSync('package.json', JSON.stringify(pkg))
   fauxProject.modules(modules)
 }

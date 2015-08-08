@@ -1,307 +1,47 @@
-// var util = require('util')
-// var assert = require('assert')
-// var _ = require('lodash')
-// var fs = require('fs-extra')
-// var chdirTemp = require('../test-chdir-temp')
-// var fauxPackage = require('../faux-package')
-// var fauxModule = require('../faux-module')
-// var moduleBuilder = require('../module-builder')
-// var path = require('path')
-//
-// /* global describe, it */
-//
-// var behavior = {}
-//
-// behavior.success = function (packageArgs, modules, root, readme, bin) {
-//
-//   var pkg = fauxPackage.apply(null, packageArgs)
-//   fs.ensureFileSync('package.json', pkg)
-//   _.each(modules, function (value, key) {
-//     var mod = fauxModule.apply(null, value)
-//     fs.ensureFileSync(key, mod)
-//   })
-//
-//   var should
-//   var promise = moduleBuilder(root)
-//   var file = path.basename(root)
-//   var fileName = path.basename(file, path.extname(file))
-//
-//   describe(fileName, function () {
-//
-//     var paths = [
-//       [path.join('local_modules'), 'isDirectory'],
-//       [path.join('local_modules', fileName), 'isDirectory']
-//     ]
-//
-//     _.each(_.keys(modules), function (dep) {
-//       paths.push([dep, 'isFile'])
-//     })
-//
-//     if (readme) paths.push([readme, 'isFile'])
-//     if (bin) paths.push([bin, 'isFile'])
-//     paths.push([path.join('./node_modules/', fileName), 'isSymbolicLink'])
-//
-//     paths.forEach(function (items) {
-//       var _path = items[0]
-//       var _isType = items[1]
-//       should = util.format('should create \'%s\'', _path)
-//       it(should, function () {
-//         promise.then(function () {
-//           assert.equal(fs.lstatSync(_path)[_isType](), true)
-//         })
-//       })
-//     })
-//
-//     it('should have package', function () {
-//       var _path = path.join('./local_modules/', fileName, '/package.json')
-//       var createdPkg = fs.readJsonSync(_path)
-//       assert.deepEqual(createdPkg, pkg)
-//     })
-//
-//   })
-//
-// }
-//
-// var tests = [
-//   {
-//     'behavior': behavior.success,
-//     'deps': ['underscore', 'bluebird', 'ramda'],
-//     'root': 'alpha.js',
-//     'files': [], // where to put bins, readme, & tests
-//     'modules': {
-//       'alpha.js': ['./beta.js'],
-//       'beta.js': ['underscore', 'bluebird', 'ramda']
-//     }
-//   }
-// ]
-//
-// describe('package-deps', function () {
-//   chdirTemp(); if (!GLOBAL.fsmock) throw new Error('no mock')
-//
-//   tests.forEach(function (test, key) {
-//     var packageArgs = []
-//       packageArgs, modules, root, readme, bin
-//
-//     if (test.deps) packageArgs.push(test.deps)
-//     if (test.devDeps) packageArgs.push(test.devDeps)
-//     return test.behavior(packageArgs, test.root, test.modules, test.expected, key)
-//   })
-//
-// })
+var _ = require('lodash')
+var util = require('util')
+var path = require('path')
+var assert = require('assert')
+var fs = require('fs-extra')
+var chdirTemp = require('../test-chdir-temp')
+var fauxProject = require('../faux-project')
+var moduleBuilder = require('../module-builder')
+var tests = require('./data-project-definitions')
+var DESC = path.basename(__filename, path.extname(__filename))
 
-// var assert = require('assert')
-// var _ = require('underscore')
-// var util = require('util')
-// var os = require('os')
-// var path = require('path')
-// var Promise = require('bluebird')
-// var fse = Promise.promisifyAll(require('fs-extra'))
-// var fs = require('fs')
-// var moduleBuilder = require('../module-builder')
-// var CWD = process.cwd()
-//
-// /* global describe, it, before, beforeEach, after, afterEach */
-//
-// var TEST_DIR = path.join(os.tmpdir(), 'module-builder')
-//
-// describe('module-builder', function () {
-//
-//   before(function () {
-//     fse.emptyDirSync(TEST_DIR)
-//     process.chdir(TEST_DIR)
-//   })
-//
-//   beforeEach(function () {
-//     fs.writeFileSync('./package.json', (function () {
-//       return [ '{',
-//       '  "name": "example-package-deps",',
-//       '  "version": "0.0.1",',
-//       '  "description": "Example for testing packageDeps()",',
-//       '  "devDependencies": {',
-//       '    "bluebird": "^2.9.34",',
-//       '    "chai": "^3.2.0",',
-//       '    "chai-as-promised": "^5.1.0",',
-//       '    "fs-extra": "reggi/node-fs-extra",',
-//       '    "jsdoctest": "^1.6.0",',
-//       '    "mocha": "^2.2.5",',
-//       '    "mock-fs": "^3.0.0",',
-//       '    "underscore": "^1.8.3"',
-//       '  },',
-//       '  "dependencies": {',
-//       '    "acorn": "^2.1.0",',
-//       '    "acorn-umd": "^0.4.0",',
-//       '    "argx": "^1.1.5",',
-//       '    "async": "^1.4.0",',
-//       '    "bluebird": "^2.9.34",',
-//       '    "data.task": "^3.0.0",',
-//       '    "fs-extra": "^0.22.1",',
-//       '    "graceful-fs": "^4.1.2",',
-//       '    "jsdoctest": "^1.6.0",',
-//       '    "lodash": "^3.10.0",',
-//       '    "mocha": "^2.2.5",',
-//       '    "ramda": "^0.17.1",',
-//       '    "underscore": "^1.8.3"',
-//       '  }',
-//       '}'].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./file-with-local.js', (function () {
-//       return [
-//         'var _ = require(\'underscore\')',
-//         'var Promise = require(\'bluebird\')',
-//         'var fs = Promise.promisifyAll(require(\'fs\'))',
-//         'var local = require(\'./local-dep\')'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./docs/file-with-local.md', (function () {
-//       return [
-//         '# Some Documentation',
-//         'Some Paragraph'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./test/file-with-local.js', (function () {
-//       return [
-//         '// Some test file'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./test/test-dependant.js', (function () {
-//       return [
-//         'var R = require(\'ramda\')'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./test/file-with-test-local-dep.js', (function () {
-//       return [
-//         // this should pull "./test/test-dependant.js" and not "./test-dependant.js"
-//         'var testDependant = require("./test-dependant.js")'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./local-dep.js', (function () {
-//       return [
-//         'var R = require(\'ramda\')'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./file-without-local.js', (function () {
-//       return [
-//         'var _ = require(\'underscore\')',
-//         'var Promise = require(\'bluebird\')',
-//         'var fs = Promise.promisifyAll(require(\'fs\'))'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./file-with-test-local-dep.js', (function () {
-//       return [
-//         'var _ = require(\'underscore\')',
-//         'var Promise = require(\'bluebird\')',
-//         'var fs = Promise.promisifyAll(require(\'fs\'))'
-//       ].join('\n')
-//     }()))
-//
-//     fse.ensureFileSync('./missing-dep.js', (function () {
-//       return [
-//         'var $ = require(\'jquery\')'
-//       ].join('\n')
-//     }()))
-//
-//   })
-//
-//   afterEach(function (done) {
-//     fse.emptyDir(TEST_DIR, done)
-//   })
-//
-//   after(function () {
-//     process.chdir(CWD)
-//     fse.removeSync(TEST_DIR)
-//   })
-//
-//   function verifyLinkOrSymlink (src, dst) {
-//     var srcStat = fs.lstatSync(src)
-//     var dstStat = fs.lstatSync(dst)
-//     if (srcStat.isFile() && (dstStat.isFile() || dstStat.isSymbolicLink())) {
-//       var srcContent = fs.readFileSync(src, 'utf8')
-//       var dstContent = fs.readFileSync(dst, 'utf8')
-//       return [srcContent, dstContent]
-//     }else if (srcStat.isDirectory() && (dstStat.isDirectory() || dstStat.isSymbolicLink())) {
-//       var srcContents = fs.readdirSync(src)
-//       var dstContents = fs.readdirSync(dst)
-//       return [srcContents, dstContents]
-//     }
-//   }
-//
-//   function clenseDeps (pkg) {
-//     if (Array.isArray(pkg)) return pkg.sort()
-//     return _.keys(pkg).sort()
-//   }
-//
-//   var tests = [
-//     ['./file-with-local.js', {
-//       test: false,
-//       docs: false,
-//       localDependencies: ['./local-dep.js'],
-//       localDevDependencies: [],
-//       dependencies: ['underscore', 'bluebird', 'ramda'],
-//       devDependencies: []
-//     }],
-//     ['./file-without-local.js', {
-//       test: false,
-//       docs: false,
-//       localDependencies: [],
-//       localDevDependencies: [],
-//       dependencies: ['underscore', 'bluebird'],
-//       devDependencies: []
-//     }]
-//     // ['./file-with-test-local-dep.js', {
-//     //   test: true,
-//     //   docs: false,
-//     //   localDependencies: [],
-//     //   localDevDependencies: ['./test/test-dependant.js'],
-//     //   dependencies: ['underscore', 'bluebird'],
-//     //   devDependencies: ['ramda']
-//     // }]
-//   ]
-//
-//   tests.forEach(function (test) {
-//     var src = test[0]
-//     var expected = test[1]
-//     var should = util.format('should build module %s', src)
-//     it(should, function () {
-//       var file = path.basename(src)
-//       var fileName = path.basename(file, path.extname(file))
-//       return moduleBuilder(src).then(function (val) {
-//         console.log(val)
-//         // files and dirs
-//         assert.equal(fs.lstatSync('./local_modules').isDirectory(), true)
-//         assert.equal(fs.lstatSync('./local_modules/' + fileName).isDirectory(), true)
-//
-//         if (expected.test) assert.equal(fs.lstatSync('./local_modules/' + fileName + '/test').isDirectory(), true)
-//         // links
-//         assert.equal(fs.lstatSync('./local_modules/' + fileName + '/' + file).isFile(), true)
-//         assert.equal.apply(null, verifyLinkOrSymlink('./' + file, './local_modules/' + fileName))
-//         if (expected.test) assert.equal.apply(null, verifyLinkOrSymlink('./test/' + file, './local_modules/' + fileName + '/test/' + file))
-//         if (expected.docs) assert.equal.apply(null, verifyLinkOrSymlink('./docs/' + fileName + '.md', './local_modules/' + fileName + '/readme.md'))
-//         assert.equal.apply(null, verifyLinkOrSymlink('./' + file, './local_modules/' + fileName + '/' + file))
-//
-//         expected.localDependencies.forEach(function (dep) {
-//           assert.equal.apply(null, verifyLinkOrSymlink(dep, path.join('./local_modules/' + fileName, dep)))
-//         })
-//
-//         expected.localDevDependencies.forEach(function (dep) {
-//           assert.equal.apply(null, verifyLinkOrSymlink(dep, path.join('./local_modules/' + fileName, dep)))
-//         })
-//
-//         // symlink
-//         assert.equal.apply(null, verifyLinkOrSymlink('./node_modules/' + fileName, './local_modules/' + fileName))
-//         // package
-//         var packageJson = fs.readFileSync('./local_modules/' + fileName + '/package.json')
-//         packageJson = JSON.parse(packageJson)
-//         assert.deepEqual(clenseDeps(packageJson.devDependencies), clenseDeps(expected.devDependencies))
-//         assert.deepEqual(clenseDeps(packageJson.dependencies), clenseDeps(expected.dependencies))
-//       })
-//     })
-//   })
-// })
+/* global describe, it */
+
+describe(DESC, function () {
+  chdirTemp(); if (!GLOBAL.fsmock) throw new Error('no mock')
+
+  tests.forEach(function (project) {
+    var should = util.format('should build module for %s', project.root)
+    it(should, function () {
+      fauxProject(project)
+      var moduleName = path.basename(project.root, path.extname(project.root))
+      return moduleBuilder(project.root).then(function () {
+
+        var paths = [
+          [path.join('./local_modules'), 'isDirectory'],
+          [path.join('./local_modules', moduleName), 'isDirectory'],
+          [path.join('./node_modules/', moduleName), 'isSymbolicLink']
+        ]
+        var files = _.flatten(_.keys(project.modules), _.keys(project.files), _.keys(project.tests), project.root)
+        _.each(files, function (dep) {
+          paths.push([dep, 'isFile'])
+        })
+        paths.forEach(function (items) {
+          assert.equal(fs.lstatSync(items[0])[items[1]](), true)
+        })
+        var pkgPath = path.join('./local_modules/', moduleName, '/package.json')
+        var pkg = fs.readJsonSync(pkgPath)
+        var deps = (project.deps) ? project.deps : []
+        var devDeps = (project.devDeps) ? project.devDeps : []
+        var expectedPkg = fauxProject.package(deps, devDeps)
+        if(!pkg.devDependencies) pkg.devDependencies = {}
+        assert.deepEqual(pkg.dependencies, expectedPkg.dependencies)
+        assert.deepEqual(pkg.devDependencies, expectedPkg.devDependencies)
+      })
+    })
+  })
+})
