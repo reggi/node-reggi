@@ -21,6 +21,9 @@ var packageDeps = require('./package-deps')
  * @param  {string} packageFile Path of parent pacakge.json file.
  */
 function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile) {
+  // if (typeof mainFile == )
+  // var argValues = _values(arguments)
+  // var argKeys = ['mainFile', 'moduleName', 'testDir', 'docsDir', 'localDir', 'packagesDir', 'binDir', 'readmeName', 'packageFile']
   var paths = {}
   paths.main = path.join(mainFile)
   paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(mainFile, path.extname(mainFile)))
@@ -75,41 +78,40 @@ function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packag
     return results
   })
   .then(function (results) {
-    // make links
-    var operations = {}
-    return moduleHarvest.makeLinks(results.links, paths.localModulesDirDst)
-    .then(function (links) {
-      operations.links = links
-      return operations
+    return moduleHarvest.promisePropsSeries({
+      'links': function () {
+        return moduleHarvest.makeLinks(results.links, paths.localModulesDirDst)
+      },
+      'package': function () {
+        return moduleHarvest.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
+      },
+      'symlinkModule': function () {
+        return fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
+          .then(moduleHarvest.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+          .catch(moduleHarvest.debugCatch)
+      },
+      'linkReadme': function () {
+        return fs.ensureLinkAsync(paths.readmeSrc, paths.readmeDst)
+          .then(moduleHarvest.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+          .catch(moduleHarvest.debugCatch)
+      }
     })
-    .then(function (operations) {
-      // make package
-      return moduleHarvest.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
-      .then(function (pkg) {
-        operations.package = pkg
-        return operations
-      })
+  })
+}
+
+moduleHarvest.promisePropsSeries = function (props) {
+  var results = {}
+  props = _.mapValues(props, function (prop, key) {
+    prop.key = key
+    return prop
+  })
+  return Promise.reduce(_.values(props), function (result, action) {
+    return action().then(function (value) {
+      results[action.key] = value
     })
-    .then(function (operations) {
-      // make symlinkModule
-      return fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
-      .then(moduleHarvest.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
-      .catch(moduleHarvest.debugCatch)
-      .then(function (symlinkModule) {
-        operations.symlinkModule = symlinkModule
-        return operations
-      })
-    })
-    .then(function (operations) {
-      // link readme
-      return fs.ensureLinkAsync(paths.readmeSrc, paths.readmeDst)
-      .then(moduleHarvest.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
-      .catch(moduleHarvest.debugCatch)
-      .then(function (linkReadme) {
-        operations.linkReadme = linkReadme
-        return operations
-      })
-    })
+  }, null)
+  .then(function () {
+    return results
   })
 }
 

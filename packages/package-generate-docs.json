@@ -1,0 +1,13 @@
+{
+  "name": "generate-docs",
+  "main": "generate-docs.js",
+  "version": "0.0.1",
+  "bin": "bin/generate-docs.js",
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "bluebird": "^2.9.34",
+    "jsdoc-to-markdown": "^1.1.1",
+    "minimist": "^1.1.2"
+  }
+}

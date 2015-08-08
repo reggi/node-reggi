@@ -1,0 +1,12 @@
+{
+  "name": "arr-extract",
+  "main": "arr-extract.js",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "lodash": "^3.10.0"
+  }
+}
