@@ -29,10 +29,6 @@ The question I wanted to address was "What if there was no overhead?".
 * `autoGithubRepo` feature
 * `repoBackup` feature
 * Cake in es6 support
-* recursive git commit if files changed
-
-* bin only
-* ensureLink && ensureSymlink not to create dirs
 
 ## Flow
 

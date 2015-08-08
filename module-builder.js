@@ -7,8 +7,20 @@ var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs-extra'))
 var packageDeps = require('./package-deps')
 
+/**
+ * Build a module from file.
+ * Tracks down package dependencies, and local, main, and bin files.
+ * @param  {string} mainFile    Path to the main javascript file.
+ * @param  {string} moduleName  Name of the module.
+ * @param  {string} testDir     Directory where all the tests are stored.
+ * @param  {string} docsDir     Directory where all the docs are stored.
+ * @param  {string} localDir    Directory where built modules are stored.
+ * @param  {string} packagesDir Directory where backup package.json files go.
+ * @param  {string} binDir      Directory where the bin files are stored.
+ * @param  {string} readmeName  Name of readme files generated in built module (readme.md).
+ * @param  {string} packageFile Path of parent pacakge.json file.
+ */
 function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile) {
-
   var paths = {}
   paths.main = path.join(mainFile)
   paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(mainFile, path.extname(mainFile)))
@@ -22,7 +34,8 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
   paths.nodeModulesDir = path.join('node_modules')
   paths.nodeModulesDirDst = path.join(paths.nodeModulesDir, paths.name)
   paths.localModulesDirDst = path.join(paths.localModulesDir, paths.name)
-  paths.readme = path.join(paths.docsDir, paths.name + '.md')
+  paths.readmeSrc = path.join(paths.docsDir, paths.name + '.md')
+  paths.readmeDst = path.join(paths.localModulesDirDst, paths.readmeName)
   paths.bin = path.join(paths.binDir, paths.main)
   paths.packageBackup = path.join(paths.packagesDir, 'package-' + paths.name + '.json')
   paths.packageDst = path.join(paths.localModulesDirDst, 'package.json')
@@ -44,7 +57,6 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
     links.push(results.binDeps.local)
     links.push(results.devDeps.local)
     links.push(results.deps.root)
-    if (results.readmeExists) links.push(paths.readme)
     if (results.binExists) links.push(paths.bin)
     results.links = _.chain([links]).flattenDeep().unique().value()
     return results
@@ -72,24 +84,35 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
     .then(function (operations) {
       // make package
       return moduleBuilder.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
-    })
-    .then(function (pkg) {
-      operations.package = pkg
-      return operations
+      .then(function (pkg) {
+        operations.package = pkg
+        return operations
+      })
     })
     .then(function (operations) {
       // make symlinkModule
       return fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
-        .then(moduleBuilder.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
-        .catch(moduleBuilder.debugCatch)
+      .then(moduleBuilder.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+      .catch(moduleBuilder.debugCatch)
+      .then(function (symlinkModule) {
+        operations.symlinkModule = symlinkModule
+        return operations
+      })
     })
-    .then(function (symlinkModule) {
-      operations.symlinkModule = symlinkModule
-      return operations
+    .then(function (operations) {
+      // link readme
+      return fs.ensureLinkAsync(paths.readmeSrc, paths.readmeDst)
+      .then(moduleBuilder.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+      .catch(moduleBuilder.debugCatch)
+      .then(function (linkReadme) {
+        operations.linkReadme = linkReadme
+        return operations
+      })
     })
   })
 }
 
+/** write pacakge from existing, backup, or generate fresh */
 moduleBuilder.writePackage = function (packageDst, packageBackup, modulePackage) {
   return Promise.props({
     'backup': fs.readJsonAsync(packageBackup).catch(R.F),
@@ -124,6 +147,7 @@ moduleBuilder.writePackage = function (packageDst, packageBackup, modulePackage)
   })
 }
 
+/** make hard links */
 moduleBuilder.makeLinks = function (links, localModuleDirDst) {
   links = _.flattenDeep([links])
   return Promise.map(links, function (link) {
@@ -134,6 +158,7 @@ moduleBuilder.makeLinks = function (links, localModuleDirDst) {
   })
 }
 
+/** debug message from promise then */
 moduleBuilder.debugMsg = function () {
   var args = Array.prototype.slice.call(arguments)
   return function (value) {
@@ -142,6 +167,7 @@ moduleBuilder.debugMsg = function () {
   }
 }
 
+/** catch message for debug from promise catch */
 moduleBuilder.debugCatch = function (e) {
   debug(e.message)
   return false
