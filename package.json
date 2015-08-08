@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "A collection of functions.",
   "scripts": {
-    "test": "standard && mocha"
+    "test": "standard && mocha",
+    "doc-api": "jsdoc2md \"./*.js\" > api.md"
   },
   "author": "Thomas Reggi",
   "license": "ISC",
