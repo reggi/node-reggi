@@ -48,5 +48,27 @@ The question I wanted to address was "What if there was no overhead?".
 ```
 ./bin/module-bin.js ./recursive-deps.js '["./recursive-deps.js", "./bin/module-bin.js"]' --type=promise --method=mapRelativePaths
 ./bin/module-bin.js ./recursive-deps.js ./recursive-deps.js --type=promise --method=mapRelativePaths
-./bin/module-bin.js ./github-create-repo.js <github-accesst-token> <github-repo> --type=promise
+./bin/module-bin.js ./github-create-repo.js <github-access-token> <github-repo> --type=promise
+```
+
+## Getting a new module up and running
+
+### Command line only
+
+```
+thomas@workstation:node-reggi$ ./bin/module-bin.js ./github-create-repo.js <github-access-token> node-module-bin --type=promise
+.. response from github
+thomas@workstation:node-reggi$ ./bin/module-harvest.js ./module-bin.js
+thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ init
+Initialized empty Git repository in /Users/thomas/Desktop/labratory/node-reggi/local_modules/module-bin/.git/
+thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ add -A
+thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ commit -m 'init'
+[master (root-commit) 130b8aa] init
+ 4 files changed, 174 insertions(+)
+ create mode 100755 bin/module-bin.js
+ create mode 100644 module-bin.js
+ create mode 100644 package.json
+ create mode 100644 test/module-bin.js
+thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ remote add origin https://github.com/reggi/node-module-bin.git
+thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ push origin master
 ```
