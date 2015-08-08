@@ -3,4 +3,4 @@ node_modules
 ./readme.md
 local_modules
 harvest.json
-/local_modules/module-builder/
+/local_modules/module-harvest/

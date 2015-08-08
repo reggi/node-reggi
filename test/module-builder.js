@@ -5,7 +5,7 @@ var assert = require('assert')
 var fs = require('fs-extra')
 var chdirTemp = require('../test-chdir-temp')
 var fauxProject = require('../faux-project')
-var moduleBuilder = require('../module-builder')
+var moduleHarvest = require('../module-harvest')
 var tests = require('./data-project-definitions')
 var DESC = path.basename(__filename, path.extname(__filename))
 
@@ -19,7 +19,7 @@ describe(DESC, function () {
     it(should, function () {
       fauxProject(project)
       var moduleName = path.basename(project.root, path.extname(project.root))
-      return moduleBuilder(project.root).then(function () {
+      return moduleHarvest(project.root).then(function () {
 
         // used for some more scoping to see the dir tree itself, hoping for node alternative
         // http://stackoverflow.com/questions/31817199/visual-filesystem-directory-tree-string

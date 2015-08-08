@@ -2,13 +2,13 @@
 var minimist = require('minimist')
 var argv = minimist(process.argv.slice(2))
 var mainFile = (argv['file']) ? argv['file'] : argv._.shift()
-var npmBuildModule = require('../module-builder')
+var moduleHarvest = require('../module-harvest')
 var pkg = require('../package.json')
 
 if (argv.v || argv.version) {
   console.log(pkg.version)
 } else if (mainFile) {
-  npmBuildModule(
+  moduleHarvest(
     mainFile,
     argv['name'],
     argv['test'],
@@ -19,12 +19,12 @@ if (argv.v || argv.version) {
     argv['readme']
   )
 } else {
-  console.log('module-builder - Build npm module from file')
+  console.log('module-harvest - Harvest pieces of npm module from single file.')
   console.log('')
   console.log('Usage:')
-  console.log('  module-builder <file>                            Build module.')
-  console.log('  module-builder --help | -h                       Shows this help message.')
-  console.log('  module-builder --version | -v                    Show package version.')
+  console.log('  module-harvest <file>                            Build module.')
+  console.log('  module-harvest --help | -h                       Shows this help message.')
+  console.log('  module-harvest --version | -v                    Show package version.')
   console.log('Options:')
   console.log('  --file           The javascript file to build into module.')
   console.log('  --name           The name of the new module.')

@@ -1,7 +1,7 @@
 {
-  "name": "module-builder",
-  "main": "module-builder.js",
-  "bin": "bin/module-builder.js",
+  "name": "module-harvest",
+  "main": "module-harvest.js",
+  "bin": "bin/module-harvest.js",
   "scripts": {
     "test": "standard && mocha"
   },

@@ -1,5 +1,5 @@
-<a name="moduleBuilder"></a>
-## moduleBuilder(mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile)
+<a name="moduleHarvest"></a>
+## moduleHarvest(mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile)
 Build a module from file.
 Tracks down package dependencies, and local, main, and bin files.
 
@@ -18,29 +18,29 @@ Tracks down package dependencies, and local, main, and bin files.
 | packageFile | <code>string</code> | Path of parent pacakge.json file. |
 
 
-* [moduleBuilder(mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile)](#moduleBuilder)
-  * [.writePackage()](#moduleBuilder.writePackage)
-  * [.makeLinks()](#moduleBuilder.makeLinks)
-  * [.debugMsg()](#moduleBuilder.debugMsg)
-  * [.debugCatch()](#moduleBuilder.debugCatch)
+* [moduleHarvest(mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile)](#moduleHarvest)
+  * [.writePackage()](#moduleHarvest.writePackage)
+  * [.makeLinks()](#moduleHarvest.makeLinks)
+  * [.debugMsg()](#moduleHarvest.debugMsg)
+  * [.debugCatch()](#moduleHarvest.debugCatch)
 
-<a name="moduleBuilder.writePackage"></a>
-### moduleBuilder.writePackage()
+<a name="moduleHarvest.writePackage"></a>
+### moduleHarvest.writePackage()
 write pacakge from existing, backup, or generate fresh
 
-**Kind**: static method of <code>[moduleBuilder](#moduleBuilder)</code>  
-<a name="moduleBuilder.makeLinks"></a>
-### moduleBuilder.makeLinks()
+**Kind**: static method of <code>[moduleHarvest](#moduleHarvest)</code>  
+<a name="moduleHarvest.makeLinks"></a>
+### moduleHarvest.makeLinks()
 make hard links
 
-**Kind**: static method of <code>[moduleBuilder](#moduleBuilder)</code>  
-<a name="moduleBuilder.debugMsg"></a>
-### moduleBuilder.debugMsg()
+**Kind**: static method of <code>[moduleHarvest](#moduleHarvest)</code>  
+<a name="moduleHarvest.debugMsg"></a>
+### moduleHarvest.debugMsg()
 debug message from promise then
 
-**Kind**: static method of <code>[moduleBuilder](#moduleBuilder)</code>  
-<a name="moduleBuilder.debugCatch"></a>
-### moduleBuilder.debugCatch()
+**Kind**: static method of <code>[moduleHarvest](#moduleHarvest)</code>  
+<a name="moduleHarvest.debugCatch"></a>
+### moduleHarvest.debugCatch()
 catch message for debug from promise catch
 
-**Kind**: static method of <code>[moduleBuilder](#moduleBuilder)</code>  
+**Kind**: static method of <code>[moduleHarvest](#moduleHarvest)</code>  

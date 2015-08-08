@@ -1,5 +1,5 @@
 var dotty = require('dotty')
-var debug = require('debug')('module-builder')
+var debug = require('debug')('module-harvest')
 var _ = require('lodash')
 var R = require('ramda')
 var path = require('path')
@@ -20,7 +20,7 @@ var packageDeps = require('./package-deps')
  * @param  {string} readmeName  Name of readme files generated in built module (readme.md).
  * @param  {string} packageFile Path of parent pacakge.json file.
  */
-function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile) {
+function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packagesDir, binDir, readmeName, packageFile) {
   var paths = {}
   paths.main = path.join(mainFile)
   paths.name = (moduleName) ? path.join(moduleName) : path.join(path.basename(mainFile, path.extname(mainFile)))
@@ -76,14 +76,14 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
   .then(function (results) {
     // make links
     var operations = {}
-    return moduleBuilder.makeLinks(results.links, paths.localModulesDirDst)
+    return moduleHarvest.makeLinks(results.links, paths.localModulesDirDst)
     .then(function (links) {
       operations.links = links
       return operations
     })
     .then(function (operations) {
       // make package
-      return moduleBuilder.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
+      return moduleHarvest.writePackage(paths.packageDst, paths.packageBackup, results.modulePackage)
       .then(function (pkg) {
         operations.package = pkg
         return operations
@@ -92,8 +92,8 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
     .then(function (operations) {
       // make symlinkModule
       return fs.ensureSymlinkAsync(paths.localModulesDirDst, paths.nodeModulesDirDst)
-      .then(moduleBuilder.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('symlinked module %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+      .catch(moduleHarvest.debugCatch)
       .then(function (symlinkModule) {
         operations.symlinkModule = symlinkModule
         return operations
@@ -102,8 +102,8 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
     .then(function (operations) {
       // link readme
       return fs.ensureLinkAsync(paths.readmeSrc, paths.readmeDst)
-      .then(moduleBuilder.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('link readme %s -> %s', paths.localModulesDirDst, paths.nodeModulesDirDst))
+      .catch(moduleHarvest.debugCatch)
       .then(function (linkReadme) {
         operations.linkReadme = linkReadme
         return operations
@@ -113,53 +113,53 @@ function moduleBuilder (mainFile, moduleName, testDir, docsDir, localDir, packag
 }
 
 /** write pacakge from existing, backup, or generate fresh */
-moduleBuilder.writePackage = function (packageDst, packageBackup, modulePackage) {
+moduleHarvest.writePackage = function (packageDst, packageBackup, modulePackage) {
   return Promise.props({
     'backup': fs.readJsonAsync(packageBackup).catch(R.F),
     'destination': fs.readJsonAsync(packageDst).catch(R.F)
   }).then(function (pkg) {
     if (!pkg.destination) {
       return fs.writeJsonAsync(packageDst, modulePackage)
-      .then(moduleBuilder.debugMsg('package written'))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('package written'))
+      .catch(moduleHarvest.debugCatch)
     } else if (pkg.destination) {
       var updatedPackage = _.cloneDeep(pkg.destination)
       _.extend(updatedPackage, modulePackage)
       return fs.writeJsonAsync(packageDst, updatedPackage)
-      .then(moduleBuilder.debugMsg('package destination updated'))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('package destination updated'))
+      .catch(moduleHarvest.debugCatch)
     } else if (pkg.backup) {
       var updatedPackageFromBackup = _.cloneDeep(pkg.backup)
       _.extend(updatedPackageFromBackup, modulePackage)
       return fs.writeJsonAsync(packageDst, updatedPackageFromBackup)
-      .then(moduleBuilder.debugMsg('package restored and updated from backup'))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('package restored and updated from backup'))
+      .catch(moduleHarvest.debugCatch)
     } else {
       return fs.writeJsonAsync(packageDst, modulePackage)
-      .then(moduleBuilder.debugMsg('package restored and updated from backup'))
-      .catch(moduleBuilder.debugCatch)
+      .then(moduleHarvest.debugMsg('package restored and updated from backup'))
+      .catch(moduleHarvest.debugCatch)
     }
   })
   .then(function () {
     return fs.ensureLinkAsync(packageDst, packageBackup)
-    .then(moduleBuilder.debugMsg('package backedup'))
-    .catch(moduleBuilder.debugCatch)
+    .then(moduleHarvest.debugMsg('package backedup'))
+    .catch(moduleHarvest.debugCatch)
   })
 }
 
 /** make hard links */
-moduleBuilder.makeLinks = function (links, localModuleDirDst) {
+moduleHarvest.makeLinks = function (links, localModuleDirDst) {
   links = _.flattenDeep([links])
   return Promise.map(links, function (link) {
     var dstpath = path.join(localModuleDirDst, link)
     return fs.ensureLinkAsync(link, dstpath)
-    .then(moduleBuilder.debugMsg('link ensured %s -> %s', link, dstpath))
-    .catch(moduleBuilder.debugCatch)
+    .then(moduleHarvest.debugMsg('link ensured %s -> %s', link, dstpath))
+    .catch(moduleHarvest.debugCatch)
   })
 }
 
 /** debug message from promise then */
-moduleBuilder.debugMsg = function () {
+moduleHarvest.debugMsg = function () {
   var args = Array.prototype.slice.call(arguments)
   return function (value) {
     debug.apply(null, args)
@@ -168,9 +168,9 @@ moduleBuilder.debugMsg = function () {
 }
 
 /** catch message for debug from promise catch */
-moduleBuilder.debugCatch = function (e) {
+moduleHarvest.debugCatch = function (e) {
   debug(e.message)
   return false
 }
 
-module.exports = moduleBuilder
+module.exports = moduleHarvest
