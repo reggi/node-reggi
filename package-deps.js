@@ -9,19 +9,37 @@ function packageDeps (file, packageFile) {
   return recursiveDeps.mapRelativePaths(file)
   .then(function (deps) {
     results.deps = deps
-    var scan = _.flattenDeep([deps.local, deps.root])
-    var possibleFiles = packageDeps.possibleTestFiles(scan)
-    return packageDeps.getExitingFiles(possibleFiles)
-  }).then(function (testFiles) {
+    var possibleBinFiles = packageDeps.possibleBinFiles(deps.root)
+    return packageDeps.getExitingFiles(possibleBinFiles)
+  })
+  .then(function (binFiles) {
+    results.binFiles = binFiles
+    results.binFile = (!binFiles.length) ? false : binFiles[0]
+    return recursiveDeps.mapRelativePaths(results.binFile)
+  })
+  .then(function (binDeps) {
+    results.binDeps = binDeps
+    results.allDeps = _.merge(results.deps, results.binDeps, function (a, b) {
+      if (_.isArray(a)) return a.concat(b)
+    })
+    var scan = _.flattenDeep([results.deps.local, results.deps.root])
+    var possibleTestFiles = packageDeps.possibleTestFiles(scan)
+    return packageDeps.getExitingFiles(possibleTestFiles)
+  })
+  .then(function (testFiles) {
     results.testFiles = testFiles
     return recursiveDeps.mapRelativePaths(testFiles)
-  }).then(function (devDeps) {
+  })
+  .then(function (devDeps) {
     results.devDeps = devDeps
     return fs.readFileAsync(packageFile, 'utf8').then(JSON.parse)
-  }).then(function (pkg) {
+  })
+  .then(function (pkg) {
     results.package = pkg
-    return packageDeps.designateDeps(results.deps, results.devDeps, results.package)
-  }).then(function (pkgDeps) {
+    return packageDeps.designateDeps(results.allDeps, results.devDeps, results.package)
+  })
+  .then(function (pkgDeps) {
+    // console.log(results)
     results.pkgDeps = pkgDeps
     return results
   })
@@ -50,7 +68,27 @@ packageDeps.getExitingFiles = function (files) {
   .call('value')
 }
 
-/** given an array of files, creates array of possible test file localtions */
+/** given an array of files, creates array of possible test file locations */
+packageDeps.possibleBinFiles = function (files) {
+  return _.chain([files])
+  .flatten()
+  .map(function (file) {
+    var parse = path.parse(file)
+    var format = path.format(parse)
+    return [
+      path.join('./bin/', file),
+      path.join('./bin/', format),
+      path.join('./bin/', parse.base),
+      path.join('./bins/', file),
+      path.join('./bins/', format),
+      path.join('./bins/', parse.base)
+    ]
+  })
+  .flatten()
+  .value()
+}
+
+/** given an array of files, creates array of possible test file locations */
 packageDeps.possibleTestFiles = function (files) {
   return _.chain([files])
   .flatten()

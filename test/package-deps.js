@@ -16,9 +16,10 @@ function fauxPackageDeps (options) {
 
   options.modules = (options.modules) ? options.modules : []
   options.tests = (options.tests) ? options.tests : []
+  options.bin = (options.bin) ? options.bin : []
 
-  expected.localDeps = _.chain(options.modules)
-  .values()
+  var localDeps = [_.values(options.modules), _.values(options.bin)]
+  expected.localDeps = _.chain(localDeps)
   .flattenDeep()
   .groupBy(function (dep) {
     return recursiveDeps.depType(dep)
