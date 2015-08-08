@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var minimist = require('minimist')
 var argv = minimist(process.argv.slice(2))
 var mainFile = (argv['file']) ? argv['file'] : argv._.shift()

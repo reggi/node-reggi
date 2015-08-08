@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var minimist = require('minimist')
 var _ = require('lodash')
 var argv = minimist(process.argv.slice(2))

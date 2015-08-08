@@ -32,11 +32,13 @@
     "dotty": "0.0.2",
     "fs-extra": "reggi/node-fs-extra#enhanced",
     "graceful-fs": "^4.1.2",
+    "jsdoc-to-markdown": "^1.1.1",
     "jsdoctest": "^1.6.0",
     "lodash": "^3.10.0",
     "minimist": "^1.1.2",
     "mocha": "^2.2.5",
     "ramda": "^0.17.1",
+    "stream-to-promise": "^1.0.4",
     "underscore": "^1.8.3"
   }
 }
