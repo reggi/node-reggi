@@ -6,6 +6,7 @@ var path = require('path')
 var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs-extra'))
 var packageDeps = require('./package-deps')
+var promisePropsSeries = require('./promise-props-series')
 
 /**
  * Build a module from file.
@@ -78,7 +79,7 @@ function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packag
     return results
   })
   .then(function (results) {
-    return moduleHarvest.promisePropsSeries({
+    return promisePropsSeries({
       'links': function () {
         return moduleHarvest.makeLinks(results.links, paths.localModulesDirDst)
       },
@@ -96,22 +97,6 @@ function moduleHarvest (mainFile, moduleName, testDir, docsDir, localDir, packag
           .catch(moduleHarvest.debugCatch)
       }
     })
-  })
-}
-
-moduleHarvest.promisePropsSeries = function (props) {
-  var results = {}
-  props = _.mapValues(props, function (prop, key) {
-    prop.key = key
-    return prop
-  })
-  return Promise.reduce(_.values(props), function (result, action) {
-    return action().then(function (value) {
-      results[action.key] = value
-    })
-  }, null)
-  .then(function () {
-    return results
   })
 }
 
