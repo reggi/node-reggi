@@ -55,13 +55,18 @@ The question I wanted to address was "What if there was no overhead?".
 
 ### Command line only
 
-```
+```bash
+# creates github repo `reggi/node-module-bin`
 thomas@workstation:node-reggi$ ./bin/module-bin.js ./github-create-repo.js <github-access-token> node-module-bin --type=promise
 .. response from github
+# harvests `module-bin`
 thomas@workstation:node-reggi$ ./bin/module-harvest.js ./module-bin.js
+# init's the new repo
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ init
 Initialized empty Git repository in /Users/thomas/Desktop/labratory/node-reggi/local_modules/module-bin/.git/
+# add all files
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ add -A
+# commit initial
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ commit -m 'init'
 [master (root-commit) 130b8aa] init
  4 files changed, 174 insertions(+)
@@ -69,6 +74,8 @@ thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ commit -m 'ini
  create mode 100644 module-bin.js
  create mode 100644 package.json
  create mode 100644 test/module-bin.js
+# add the github origin repo
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ remote add origin https://github.com/reggi/node-module-bin.git
+# push the module
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ push origin master
 ```
