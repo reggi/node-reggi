@@ -79,3 +79,14 @@ thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ remote add ori
 # push the module
 thomas@workstation:node-reggi$ git -C ./local_modules/module-bin/ push origin master
 ```
+
+Then it seems the only way to continue is to remove the new module and clone it again. with `gits attach`.
+
+```bash
+$$
+thomas@workstation:node-reggi$ rm -rf ./local_modules/module-bin
+thomas@workstation:node-reggi$ gits attach https://github.com/reggi/node-module-bin.git local_modules/module-bin
+Cloning into 'local_modules/module-bin'...
+```
+
+At the end of all this, you have a `slave` repo to the `superproject` and evey thing is in-sync.
