@@ -1,0 +1,16 @@
+{
+  "name": "arr-camelize",
+  "main": "arr-camelize.js",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "author": "Thomas Reggi",
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "ramda": "^0.17.1"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0"
+  }
+}
