@@ -4,7 +4,7 @@
   "description": "A collection of functions.",
   "scripts": {
     "test": "standard && mocha",
-    "doc-api": "jsdoc2md \"./*.js\" > api.md"
+    "doc-api": "jsdoc2md \"./*.js\" > API.md"
   },
   "author": "Thomas Reggi",
   "license": "ISC",
@@ -38,6 +38,7 @@
     "lodash": "^3.10.0",
     "minimist": "^1.1.2",
     "mocha": "^2.2.5",
+    "npm-exists": "^0.1.0",
     "octonode": "^0.7.1",
     "ramda": "^0.17.1",
     "simple-git": "^1.7.0",
