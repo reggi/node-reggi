@@ -21,15 +21,56 @@ The question I wanted to address was "What if there was no overhead?".
 ## Todo (module-harvest)
 
 * run jsdoc2md before harvests
-* Cake in es6 support
+* cake in es6 support
   * if file in root dir is es6 auto bundle dist and src in module
-* add common .gitignore to built modules
-  * `npm-debug.log`
-  * `node_modules`
 * add `test` and `doc` dirs to possible search
-* havesting watch script
+* add support for `lib` dir as `root`, so people can put all their functions in a folder.
+  * note if this occurs no modules can be included from outside lib, or else harvesting won't occur correctly.
+* harvesting watch script
   * remove unused deps from module
-  * add new deps to module 
+  * add new deps to module
+* ? retrieve possible `readme` names from superproject and use that, meaning if `README` exists in `superproject`, that file name will be used to name local_module's `readme`
+* Change default for `readme` to `README.md`
+* Pull in `LICENCE` file from `superproject`
+* Pull in `CONTRIBUTING` file from `superproject`
+* Pull in `.gitignore-harvest` file from `superproject` as `.gitignore`
+* Generated docs v.s. actual docs
+  * If I write a lengthy amount of documentation I don't want to be forced to have to convert it into jsdoc syntax and plop it in my javascript source code. I'd way rather prefer to write it in legit markdown. This means that I'd have two docs, one that I actually write content in and another that is generated, super anoying. [doctoc](https://github.com/thlorenz/doctoc) does something very interesting, it uses a comment block to update a document with content in place, rather then overwriting, or storing multiple pieces of a file, I really like this alternative. If a markdown file exists in `docs` and has that string it will put the `jsdocmd` in that area and not overwrite existing documentation. If it exists and doesn't have the comment block the `jsdocmd` is not placed in, nothing happens, and if the file doesn't exist then the doc is created with `jsdocmd` in it alone (within comment blocks).
+
+## Hard Links vs Copying
+
+This isn't the easiest of choices because there's perks to having both. It's apparent that if the functionality of `module-harvest` would be to output a function
+
+### For Copying
+
+There are two cases I can think of where copying is ideal, and that's when the source code itself is changed. Meaning copying is essential when the local javascript file in the `superproject` needs to be altered in some way before it's placed inside the `local_module`. There are two instances where this might occur.
+
+__Changing source references from `./local-module` to `local-module`__
+
+If I wanted to track down all the references to a local module call and change them to module calls, for instance if the reference `./arr-extend.js` was used and I wanted to convert it to `arr-extend` (if placed on npm), and `reggi/node-arr-extend` (if placed just on github), this would alter the source code programmatically.
+
+__Transpiling source__
+
+If I wanted to write `es6` or `coffeescript` or whatever, I could have `module-harvest` automatically transpile the source contents before it plops in into a `local_module`.
+
+### For Hard Linking
+
+It was a nice thought early on that the files would be automatically connected with hard links, that way if I edit a file in the `superproject` it is updated in the `local_module`. This isn't great because it doesn't paint the full picture. If a `local_module` adds a new dep after it is created it won't magically add that file, `module-harvest` for that `local_module` needs to be built all over again. It's apparent that linking alone isn't the answer. Whenever a `superproject` file is saved the files for all modules that use that file need to be `harvested` a list of `diff` files from the new `local_module` and old `local_module` need to be created. The ability for files to get removed or added will be necessary.
+
+An alternative to the `diff` is to delete the entire module contents (everything except .git) if it exists every time a `module-harvest` is run. This will provide the pruning (?) action without a diff tree.
+
+## harvest.json
+
+Here's what this `superproject`'s `harvest.json` looks like, it's a `1:1` map of arguments that `module-harvest` takes. These variables extend any arguments passed into `module_harvest` directly.
+
+```
+{
+  "githubAccessToken": <token>,
+  "githubRepoPrefix": "node-"
+}
+```
+
+## Module Bin Examples
 
 ```
 ./bin/module-bin.js ./recursive-deps.js '["./recursive-deps.js", "./bin/module-bin.js"]' --type=promise --method=mapRelativePaths

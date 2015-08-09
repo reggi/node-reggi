@@ -1,7 +1,5 @@
-node_modules
 .DS_Store
-./readme.md
+node_modules
 local_modules
 harvest.json
 npm-debug.log
-/local_modules/module-bin/
