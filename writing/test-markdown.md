@@ -1,6 +1,6 @@
 # test-markdown
 
-I wanted a way of writing unit tests in markdown. I've been playing around with things like `[yamadapc/jsdoctest](https://github.com/yamadapc/jsdoctest)` which parses `JSDoc` declarations looking for `@example` keywords in source code and creates a test based on them. I took this one step further and just wanted to be able two ensure that the javascript I write within markdown is valid.
+I wanted a way of writing unit tests in markdown. I've been playing around with things like [`yamadapc/jsdoctest`](https://github.com/yamadapc/jsdoctest) which parses `JSDoc` declarations looking for `@example` keywords in source code and creates a test based on them. I took this one step further and just wanted to be able two ensure that the javascript I write within markdown is valid.
 
 ```javascript
 var assert = require('assert')
