@@ -120,6 +120,8 @@ var moduleHarvest = require('./module-harvest')
 moduleHarvest(moduleFile, moduleName, moduleDesc, moduleVersion, packageSrc, localModulesDirName, directory, buildLinks, trackDeps, trackDevDeps, postBuildReverseLinks, githubAccessToken, githubRepoPrefix, preventMerge)
 ```
 
+## harvest.config.js
+
 Here's an example what this might look like in `harvest.config.js`, in fact this is the default. Unless the `preventMerge` argument is true, these options are used. If you add your own optios you append to these. There's no harm in having links to possible files that don't exist.
 
 ```javascript
@@ -161,6 +163,22 @@ module.exports = function (args) {
 ```
 
 Note here that `trackDevDeps` is a function not an array. This is because as mentioned earlier a module can have many local file references. The `trackDevDeps` function is run recursively for every local file found in the tree.
+
+> Note: You can also set variables from a static harvest.config.json file.
+
+## harvest.secret.json
+
+If your smart you might have realized that theres a nefarious `githubAccessToken` argument. This can't go in a publicly used place so you can use a `harvest.secret.json` file that looks like this.
+
+```
+{
+  "githubAccessToken": <github-token
+}
+```
+
+You'll wanna add `harvest.secret.json` to your `.gitignore` file.
+
+> Note: You can also set variables from a static harvest.secret.json file.
 
 ## Life After the Initial Build
 
