@@ -9,6 +9,16 @@ var markedAsync = Promise.promisify(marked)
 var _eval = require('eval')
 var entities = new Entities()
 
+/**
+ * :fishing_pole_and_fish: Executes javascript code blocks from markdown files.
+ * @module eval-js-md
+ * @package.keywords eval, evaulate, javascript, markdown, test
+ * @package.preferGlobal
+ * @package.repository.type git
+ * @package.repository.url https://github.com/reggi/node-eval-js-md
+ */
+
+/** evaluates a dir of md files or a single file */
 function testMarkdown (prividedPath) {
   return fs.lstatAsync(prividedPath)
   .then(function (stats) {
@@ -26,12 +36,14 @@ function testMarkdown (prividedPath) {
   })
 }
 
+/** prepends array items with dir path */
 testMarkdown.prependPaths = function (files, dir) {
   return _.map(files, function (file) {
     return path.join(dir, file)
   })
 }
 
+/** takes array of files, parses md, parses html, html entities, evals */
 testMarkdown.files = function (files) {
   files = _.flatten([files])
   return Promise.map(files, function (file) {
@@ -40,11 +52,14 @@ testMarkdown.files = function (files) {
     .then(testMarkdown.getJsFromHTML)
     .then(entities.decode)
     .then(function (code) {
-      return _eval(code, path.parse(file).name, {}, true)
+      var parsed = path.parse(file)
+      parsed.format = path.format(parsed)
+      return _eval(code, parsed.format, {}, true)
     })
   })
 }
 
+/** selecting the js code html blocks in the dom */
 testMarkdown.getJsFromHTML = function (mdContent) {
   var $ = cheerio.load(mdContent, {decodeEntities: false})
   var code = $('code.lang-javascript')

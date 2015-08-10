@@ -14,7 +14,7 @@ var doc = {
     '<path>': 'File or directory of markdown files to test.'
   },
   'options': {
-    'path': 'File or directory of markdown files to test.',
+    'path': 'File or directory of markdown files to test.'
   }
 }
 
