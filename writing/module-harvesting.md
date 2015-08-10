@@ -160,6 +160,8 @@ module.exports = function (args) {
 }
 ```
 
+Note here that `trackDevDeps` is a function not an array. This is because as mentioned earlier a module can have many local file references. The `trackDevDeps` function is run recursively for every local file found in the tree.
+
 ## Life After the Initial Build
 
 Maintaining file state is high priority after the initial build of a module. It's apparent that the hard links alone will not cut it there's gonna need to be a watch script that builds the module(s) whenever a dependency is saved. The problem with that is, without having a map of which local files being used in which project I'd have to build every module, every time something is saved. The map would help a ton, even when a module doesn't yet `require()` it. Because a file that is already connected to a module would need to be updated to include it, at which time `module-harvest` would run and the new file would be added to the map watch list. An expected `--watch` and `-w` flag would be appropriate.
