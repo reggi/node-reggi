@@ -6,7 +6,7 @@
     "test": "./node_modules/.bin/standard && mocha && ./bin/test-markdown.js ./docs",
     "doc-toc": "doctoc ./docs --github",
     "doc-api": "jsdoc2md \"./*.js\" > API.md",
-    "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js" 
+    "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js"
   },
   "author": "Thomas Reggi <thomas@reggi.com>",
   "license": "ISC",
@@ -21,7 +21,6 @@
     "jsdoctest": "^1.6.0",
     "mocha": "^2.2.5",
     "mock-fs": "^3.0.0",
-    "standard": "^5.0.2",
     "underscore": "^1.8.3"
   },
   "dependencies": {
