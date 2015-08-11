@@ -12,6 +12,20 @@ Here's a great quote from [`substack`](http://substack.net/how_I_write_modules).
 
 The question I wanted to address was "What if there was no overhead?".
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [The nitty gritty](#the-nitty-gritty)
+- [The Settings](#the-settings)
+- [harvest.config.js](#harvestconfigjs)
+- [harvest.secret.json](#harvestsecretjson)
+- [Life After the Initial Build](#life-after-the-initial-build)
+  - [Maintaining File State](#maintaining-file-state)
+  - [Maintaining Multiple Git Repos with `gitslave`](#maintaining-multiple-git-repos-with-gitslave)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## The nitty gritty
 
 A file is provided to the terminal command for instance, the following code is what I used to harvest `module-harvest` itself.
@@ -126,8 +140,7 @@ Here's an example what this might look like in `harvest.config.js`, in fact this
 
 ```javascript
 var path = require('path')
-module.exports = function (args) {
-  var file = path.format(args.moduleFile)
+module.exports = function (file) {
   return {
     'buildLinks': [
       // src (CWD), destination (./local_modules/<my-module>/)
@@ -182,4 +195,16 @@ You'll wanna add `harvest.secret.json` to your `.gitignore` file.
 
 ## Life After the Initial Build
 
+### Maintaining File State
+
 Maintaining file state is high priority after the initial build of a module. It's apparent that the hard links alone will not cut it there's gonna need to be a watch script that builds the module(s) whenever a dependency is saved. The problem with that is, without having a map of which local files being used in which project I'd have to build every module, every time something is saved. The map would help a ton, even when a module doesn't yet `require()` it. Because a file that is already connected to a module would need to be updated to include it, at which time `module-harvest` would run and the new file would be added to the map watch list. An expected `--watch` and `-w` flag would be appropriate.
+
+### Maintaining Multiple Git Repos with `gitslave`
+
+`gitslave` is a lovely piece of software that makes it possible to use one superproject like `reggi/node-reggi` and distribute of the packages modules from there. Lets say you change a dependency `./arr-camelize.js` and three of your `local_modules` are using it, because it's linked (and ideally theres a watch script invloved) when it's time to commit the code across all of the four repos (including the superproject) you can commit the change to all the repos using the following command, _note that `gits` is used here instead of `git`_.
+
+```
+gits add -A
+gits commit -m "updated arr-camelize"
+gits push
+```
