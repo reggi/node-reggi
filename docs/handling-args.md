@@ -35,3 +35,16 @@ assert.deepEqual(val, {'foo': 'beta', 'bar': undefined})
 ```
 
 As you can see above because there's only one prop, and it's not `foo`. The wrong parameter gets passed to the function.
+
+My solution to this problem is providing some convenience functions to remedy this.
+
+
+```javascript
+var arra
+var foo = {'bar': 'beta'}
+var val = executable.apply(null, _.values(foo))
+assert.deepEqual(val, {'foo': 'beta', 'bar': undefined})
+```
+
+<!-- START doctoc -->
+<!-- END doctoc -->

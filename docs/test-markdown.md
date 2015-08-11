@@ -20,3 +20,6 @@ Try it yourself by executing the command:
 
 * Todo:
   * run [`standard`.lintText](https://github.com/feross/standard#standardlinttexttext-opts-callback) on the javascript within a md file
+
+<!-- START doctoc -->
+<!-- END doctoc -->
