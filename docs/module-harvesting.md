@@ -202,6 +202,25 @@ You'll wanna add `harvest.secret.json` to your `.gitignore` file.
 
 > Note: You can also set variables from a static harvest.secret.json file.
 
+### Module Specific Variables Using JSDoc `@module`
+
+For module specific settings, specifically `package.json` contents you're not gonna be able to pass them in via command line every time. So I caked in `JSDoc` support. Let's start with an example.
+
+```
+/**
+ * :corn: Build a module from a single javascript file.
+ * @module module-harvest
+ * @package.keywords dependency, dependencies, build, package.json, harvest, module
+ * @package.preferGlobal
+ * @package.repository.type git
+ * @package.repository.url https://github.com/reggi/node-module-harvest
+ */
+```
+
+This comment block is in the beginning of `./module-harvest.js` it sets some stuff that will be used by `module-harvest`. You can see that there are `@package` declarations this isn't valid to `JSDoc` this is specific to `module-harvest`, upon running this, the `@package.` calls will be formed into an object and placed into `package.json` so if you want to specify a unique `script.test` or `version` the package will be created with it here.
+
+> _NOTE:_ If `@packge.private` is set this will prevent the github repo creation & init git commit + push & npm publish. It will still allow the module to be created.
+
 ## Life After the Initial Build
 
 ### Maintaining File State
