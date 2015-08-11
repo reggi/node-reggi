@@ -5,3 +5,4 @@ harvest.secret.js
 harvest.secret.json
 npm-debug.log
 .env
+/local_modules/module-harvest/
