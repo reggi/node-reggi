@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A collection of functions.",
   "scripts": {
-    "test": "./node_modules/.bin/standard && mocha && ./bin/test-markdown.js ./docs",
+    "test": "./node_modules/.bin/standard && mocha && ./bin/test-markdown.js ./docs/*.md",
     "doc-toc": "doctoc ./docs --github",
     "doc-api": "jsdoc2md \"./*.js\" > API.md",
     "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js"
@@ -36,6 +36,7 @@
     "dotty": "0.0.2",
     "eval": "^0.1.0",
     "fs-extra": "reggi/node-fs-extra#enhanced",
+    "glob": "^5.0.14",
     "graceful-fs": "^4.1.2",
     "html-entities": "^1.1.3",
     "jsdoc-parse": "^1.0.0",

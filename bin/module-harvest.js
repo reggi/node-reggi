@@ -34,7 +34,7 @@ var doc = {
     'moduleFile': ['file'],
     'moduleName': ['name'],
     'moduleDesc': ['desc'],
-    'packageSrc': ['package', 'pkg']
+    'packageSrc': ['package']
   }
 }
 
