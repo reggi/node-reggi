@@ -33,7 +33,7 @@
   "preferglobal": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/reggi/node-module-harvest"
+    "url": "https://github.com/reggi/module-harvest"
   },
   "license": "ISC"
 }

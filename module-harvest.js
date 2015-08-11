@@ -22,7 +22,7 @@ var promisePropsSeries = require('./promise-props-series')
  * @package.keywords dependency, dependencies, build, package.json, harvest, module
  * @package.preferGlobal
  * @package.repository.type git
- * @package.repository.url https://github.com/reggi/node-module-harvest
+ * @package.repository.url https://github.com/reggi/module-harvest
  */
 
 /** Tracks down package dependencies, and local, main, and bin files. */
