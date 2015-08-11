@@ -1,4 +1,4 @@
-## Module Bin
+# Module Bin
 
 ```
 ./bin/module-bin.js ./recursive-deps.js '["./recursive-deps.js", "./bin/module-bin.js"]' --type=promise --method=mapRelativePaths
