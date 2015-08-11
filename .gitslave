@@ -1,3 +1,4 @@
 "https://github.com/reggi/node-module-harvest.git" "local_modules/module-harvest"
 "https://github.com/reggi/node-module-bin.git" "local_modules/module-bin"
 "https://github.com/reggi/node-module-harvest" "./local_modules/module-harvest"
+"https://github.com/reggi/evalmd.git" "./local_modules/evalmd"
