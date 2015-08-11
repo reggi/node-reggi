@@ -351,8 +351,3 @@ And it seems that if I want it to be apparent of `gitslave` for the project that
 rm -rf ./local_modules/module-harvest.js
 gits attach https://github.com/reggi/node-module-harvest.js.git local_modules/module-harvest.js
 ```
-
-## API
-
-<!-- START jsdoc2md -->
-<!-- END jsdoc2md -->
