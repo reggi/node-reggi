@@ -84,7 +84,7 @@ function moduleHarvest () {
       if (!dotty.exists(options, 'package.licence') && dotty.exists(packacageSrcContent, 'licence')) options.package.license = packacageSrcContent.license
       options.designatedDeps = moduleHarvest.designateDeps(options.deps.npm, options.devDeps.npm, packacageSrcContent)
       _.extend(options.package, options.designatedDeps)
-      if (bin) options.package.bin = bin
+      if (options.package.bin && bin) _.extend(options.package.bin, bin)
       options.package = packageOrder(options.package, moduleHarvest.packageOrder)
       return options
     })
@@ -429,6 +429,7 @@ moduleHarvest.writePackage = function (dst, data) {
       _.defaults(existing, data)
       existing.dependencies = data.dependencies
       existing.devDependencies = data.devDependencies
+      existing.bin = data.bin
       return fs.writeJsonAsync(dst, existing)
       .then(moduleHarvest.debugMsg('package updated'))
       .catch(moduleHarvest.debugCatch)
