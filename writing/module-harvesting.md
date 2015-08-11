@@ -18,8 +18,8 @@ The question I wanted to address was "What if there was no overhead?".
 
 - [The nitty gritty](#the-nitty-gritty)
 - [The Settings](#the-settings)
-- [harvest.config.js](#harvestconfigjs)
-- [harvest.secret.json](#harvestsecretjson)
+  - [harvest.config.js](#harvestconfigjs)
+  - [harvest.secret.json](#harvestsecretjson)
 - [Life After the Initial Build](#life-after-the-initial-build)
   - [Maintaining File State](#maintaining-file-state)
   - [Maintaining Multiple Git Repos with `gitslave`](#maintaining-multiple-git-repos-with-gitslave)
