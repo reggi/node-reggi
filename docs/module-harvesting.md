@@ -20,6 +20,7 @@ The question I wanted to address was "What if there was no overhead?".
 - [The Settings](#the-settings)
   - [`harvest.config.js`](#harvestconfigjs)
   - [`harvest.secret.json`](#harvestsecretjson)
+  - [Module Specific Variables Using JSDoc `@module`](#module-specific-variables-using-jsdoc-@module)
 - [Life After the Initial Build](#life-after-the-initial-build)
   - [Maintaining File State](#maintaining-file-state)
   - [Maintaining Multiple Git Repos with `gitslave`](#maintaining-multiple-git-repos-with-gitslave)
