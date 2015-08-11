@@ -37,7 +37,7 @@ The question I wanted to address was "What if there was no overhead?".
 
 ## The Details
 
-A file is provided to the terminal command for instance, the following code is what I used to harvest `module-harvest` itself.
+A file is provided to the terminal command, for instance, the following code is what I used to harvest `module-harvest` itself.
 
 ```bash
 module-harvest ./module-harvest.js
@@ -117,9 +117,9 @@ Because the options are so complex a `harvest.config.js` file can be used at the
 ```
 module-harvest - Harvest pieces of npm module from single file.
 Usage:
-  reggi <file>                      Build module.
-  reggi --help | -h                 Shows this help message.
-  reggi --version | -v              Show package version.
+  module-harvest <file>                      Build module.
+  module-harvest --help | -h                 Shows this help message.
+  module-harvest --version | -v              Show package version.
 Options:
   --moduleFile | --file             Javascript file to build into module.
   --moduleName | --name             Name of the module. (default: moduleFile name || jsdoc module def name)

@@ -11,11 +11,10 @@ var entities = new Entities()
 
 /**
  * :fishing_pole_and_fish: Evaluates javascript code blocks from markdown files.
- * @module test-markdown
+ * @module evalmd
  * @package.keywords eval, evaulate, javascript, markdown, test
  * @package.preferGlobal
- * @package.repository.type git
- * @package.repository.url https://github.com/reggi/node-eval-js-md
+ * @package.scripts.test ./bin/test-markdown.js ./README.md
  */
 
 /** evaluates a dir of md files or a single file */
