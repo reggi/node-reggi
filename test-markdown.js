@@ -10,8 +10,8 @@ var _eval = require('eval')
 var entities = new Entities()
 
 /**
- * :fishing_pole_and_fish: Executes javascript code blocks from markdown files.
- * @module eval-js-md
+ * :fishing_pole_and_fish: Evaluates javascript code blocks from markdown files.
+ * @module test-markdown
  * @package.keywords eval, evaulate, javascript, markdown, test
  * @package.preferGlobal
  * @package.repository.type git

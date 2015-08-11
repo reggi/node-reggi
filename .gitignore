@@ -1,5 +1,7 @@
 .DS_Store
 node_modules
 local_modules
-harvest.json
+harvest.secret.js
+harvest.secret.json
 npm-debug.log
+.env

@@ -3,8 +3,10 @@
   "version": "0.0.1",
   "description": "A collection of functions.",
   "scripts": {
-    "test": "./node_modules/.bin/standard && mocha",
-    "doc-api": "jsdoc2md \"./*.js\" > API.md"
+    "test": "./node_modules/.bin/standard && mocha && ./bin/test-markdown.js ./docs",
+    "doc-toc": "doctoc ./docs --github",
+    "doc-api": "jsdoc2md \"./*.js\" > API.md",
+    "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js" 
   },
   "author": "Thomas Reggi <thomas@reggi.com>",
   "license": "ISC",

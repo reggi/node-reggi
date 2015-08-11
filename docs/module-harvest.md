@@ -1,6 +1,4 @@
-# Module Harvesting
-
-> Note: This is very experimental and the release that is in `reggi/node-reggi` (and `reggi/node-module-harvest`) are both a bit behind what I've been working on.
+# Module Harvest
 
 I just invented something I've dubbed `module harvesting`. It's a method of automated Node.js module creation. What does that mean?
 
@@ -32,7 +30,6 @@ The question I wanted to address was "What if there was no overhead?".
 - [Getting a New Module Up and Running](#getting-a-new-module-up-and-running)
   - [Command Line](#command-line)
   - [`gitslave` + `module-harvest`](#gitslave--module-harvest)
-- [API](#api)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

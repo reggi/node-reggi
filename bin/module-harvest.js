@@ -1,84 +1,67 @@
 #!/usr/bin/env node
 var _ = require('lodash')
-var minimist = require('minimist')
-var util = require('util')
-var argv = minimist(process.argv.slice(2))
-var moduleHarvest = require('../module-harvest')
-var pkg = require('../package.json')
 var path = require('path')
-var Promise = require('bluebird')
-var fs = Promise.promisifyAll(require('fs-extra'))
-var jsonPath = path.join(process.cwd(), './harvest.json')
+var pkg = require('../package.json')
+var binDoc = require('../bin-doc')
+var argv = require('minimist')(process.argv.slice(2))
+var moduleHarvest = require('../module-harvest')
+var argsManipulator = require('../args-manipulator')
 
-function readJson (jsonPath) {
-  return fs.lstatAsync(jsonPath)
-  .then(function (stat) {
-    if (!stat.isFile()) return false
-    return fs.readFileAsync(jsonPath)
-    .then(function (jsonFile) {
-      return JSON.parse(jsonFile)
-    })
-    .catch(function (err) {
-      err.message = util.format('malformed json file %s: %s', jsonPath, err.message)
-      throw err
-    })
-  })
+var doc = {
+  'name': path.parse(__filename).name,
+  'desc': pkg.description,
+  'usage': {
+    '<file>': 'Build module.',
+    '--help | -h': 'Shows this help message.',
+    '--version | -v': 'Show package version.'
+  },
+  'options': {
+    'moduleFile': 'Javascript file to build into module.',
+    'moduleName': 'Name of the module. (default: moduleFile name || jsdoc module def name)',
+    'moduleDesc': 'Description of the module (default: jsdoc module def summary || jsdoc module def desc)',
+    'packageSrc': 'Path to superproject package.json file',
+    'localModulesDirName': 'Path to where local modules will build.',
+    'directory': 'Path to directory (defaults: "./")',
+    'buildLinks': 'Array of src, [src], or [src, dst] hard link definitions, from "./" to `local_module`.',
+    'trackDeps': 'Array of src, [src] javascript definitions, from "./" to `local_module`.',
+    'trackDevDeps': 'Function returning array of src, [src] javascript testdefinitions, from "./" to `local_module`.',
+    'postBuildReverseLinks': 'Array of src, [src], or [src, dst] hard link definitions, from `local_module` to "./".',
+    'githubAccessToken': 'Github access token',
+    'githubRepoPrefix': 'Github repo prefix (ex: "node-")',
+    'preventMerge': 'Boolean option for prevent default merge options.'
+  },
+  'optionAliases': {
+    'moduleFile': ['file'],
+    'moduleName': ['name'],
+    'moduleDesc': ['desc'],
+    'packageSrc': ['package', 'pkg']
+  }
 }
 
-readJson(jsonPath).then(function (harvestConfig) {
-  if (harvestConfig) _.extend(argv, harvestConfig)
+var args = argsManipulator(moduleHarvest.defaultArgs, doc.optionAliases, argv)
+args.moduleFile = (args.moduleFile) ? args.moduleFile : argv._.shift()
 
-  var args = {
-    moduleFile: ['file'],
-    moduleName: ['name'],
-    packageDesc: ['desc'],
-    testDir: ['test'],
-    docsDir: ['docs'],
-    localDir: ['local'],
-    binDir: ['bin'],
-    packagesDir: ['packages'],
-    packageFile: ['package'],
-    readmeName: ['readme'],
-    githubAccessToken: false,
-    githubRepoPrefix: false
-  }
+if (argv.v || argv.version) {
 
-  args = _.mapValues(args, function (argOptions, key) {
-    if (!argOptions) argOptions = []
-    argOptions.push(key)
-    argOptions.push(key.toLowerCase())
-    var value = _.chain(argOptions)
-    .map(function (option) {
-      return (argv[option]) ? argv[option] : false
-    })
-    .without(false)
-    .value()
-    return (value[0]) ? value[0] : false
+  console.log(pkg.version)
+
+} else if (args.moduleFile) {
+
+  // get the file to provide to config files
+  var file = path.parse(args.moduleFile)
+  file.format = path.format(file)
+
+  // get the config arguments
+  moduleHarvest.configFileArgs(file)
+  .then(function (harvestConfig) {
+    // extend args
+    _.extend(args, harvestConfig)
+    // apply harvest
+    return moduleHarvest.apply(null, _.values(args))
   })
 
-  args.moduleFile = (args.moduleFile) ? args.moduleFile : argv._.shift()
+} else {
 
-  if (argv.v || argv.version) {
-    console.log(pkg.version)
-  } else if (args.moduleFile) {
-    moduleHarvest.apply(null, _.values(args))
-  } else {
-    console.log('module-harvest - Harvest pieces of npm module from single file.')
-    console.log('')
-    console.log('Usage:')
-    console.log('  module-harvest <file>                            Build module.')
-    console.log('  module-harvest --help | -h                       Shows this help message.')
-    console.log('  module-harvest --version | -v                    Show package version.')
-    console.log('Options:')
-    console.log('  --file           The javascript file to build into module.')
-    console.log('  --name           The name of the new module.')
-    console.log('  --test           The path of the test directory.')
-    console.log('  --docs           The path of the docs directory.')
-    console.log('  --local          The path of the new local modules direcotry.')
-    console.log('  --packages       The path of the new packages direcotry.')
-    console.log('  --bin            The path of bin file direcotry.')
-    console.log('  --readme         The name for readme files.')
-    console.log('')
-  }
+  console.log(binDoc(doc))
 
-})
+}

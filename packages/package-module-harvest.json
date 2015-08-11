@@ -8,16 +8,32 @@
   },
   "author": "Thomas Reggi",
   "dependencies": {
-    "dotty": "0.0.2",
-    "debug": "^2.2.0",
-    "lodash": "^3.10.0",
-    "ramda": "^0.17.1",
-    "bluebird": "^2.9.34",
-    "fs-extra": "reggi/node-fs-extra#enhanced",
     "acorn": "^2.1.0",
     "acorn-umd": "^0.4.0",
-    "octonode": "^0.7.1",
-    "simple-git": "^1.7.0",
-    "minimist": "^1.1.2"
-  }
+    "bluebird": "^2.9.34",
+    "debug": "^2.2.0",
+    "dotty": "0.0.2",
+    "eval": "^0.1.0",
+    "fs-extra": "reggi/node-fs-extra#enhanced",
+    "jsdoc-parse": "^1.0.0",
+    "lodash": "^3.10.0",
+    "minimist": "^1.1.2",
+    "ramda": "^0.17.1",
+    "sorted-object": "^1.0.0"
+  },
+  "description": "Build a module from a single javascript file.",
+  "keywords": [
+    "dependency",
+    "dependencies",
+    "build",
+    "package.json",
+    "harvest",
+    "module"
+  ],
+  "preferglobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reggi/node-module-harvest"
+  },
+  "license": "ISC"
 }

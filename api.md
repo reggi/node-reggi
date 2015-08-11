@@ -6,6 +6,12 @@
 <dt><a href="#module_fn-with-name-prop">fn-with-name-prop</a> ⇒ <code>function</code></dt>
 <dd><p><code>npm install fn-with-name-prop --save</code></p>
 </dd>
+<dt><a href="#module_module-harvest">module-harvest</a></dt>
+<dd><p>:corn: Build a module from a single javascript file.</p>
+</dd>
+<dt><a href="#module_test-markdown">test-markdown</a></dt>
+<dd><p>:fishing_pole_and_fish: Evaluates javascript code blocks from markdown files.</p>
+</dd>
 </dl>
 ## Functions
 <dl>
@@ -22,6 +28,9 @@ Orignated in this Stackoverflow post <a href="http://stackoverflow.com/questions
 <dt><a href="#assimilate">assimilate()</a></dt>
 <dd><p>turn the contents of array or object into sorted string</p>
 </dd>
+<dt><a href="#binDoc">binDoc()</a></dt>
+<dd><p>assemble a bin help output from a object</p>
+</dd>
 <dt><a href="#fauxProject">fauxProject()</a></dt>
 <dd><p>creates a dummy project in the current directory</p>
 </dd>
@@ -36,6 +45,12 @@ Orignated in this Stackoverflow post <a href="http://stackoverflow.com/questions
 </dd>
 <dt><a href="#fsStats">fsStats(stats)</a> ⇒ <code>String</code></dt>
 <dd><p>Given stats from fs.lstat or fs.stat will return type</p>
+</dd>
+<dt><a href="#instanceOf">instanceOf()</a></dt>
+<dd><p>returns true if value is instance of object or string name</p>
+</dd>
+<dt><a href="#moduleBin">moduleBin(filePath, args, [functionMethod], [type], [toLog], [toThrow], [toStringify])</a></dt>
+<dd><p>Proxy the execution of an entire node module.</p>
 </dd>
 </dl>
 <a name="module_fn-reproduce"></a>
@@ -236,6 +251,187 @@ var fn = fnSetName("hello", lib)
 expect(fn).to.be.instanceof(Function)
 expect(fn).to.have.property("_name", "hello")
 ```
+<a name="module_module-harvest"></a>
+## module-harvest
+:corn: Build a module from a single javascript file.
+
+**Package.keywords**: dependency, dependencies, build, package.json, harvest, module  
+**Package.preferglobal**:   
+**Package.repository.type**: git  
+**Package.repository.url**: https://github.com/reggi/node-module-harvest  
+
+* [module-harvest](#module_module-harvest)
+  * [~moduleHarvest()](#module_module-harvest..moduleHarvest)
+    * [.defaultArgs](#module_module-harvest..moduleHarvest.defaultArgs)
+    * [.configFiles](#module_module-harvest..moduleHarvest.configFiles)
+    * [.defaultArgData()](#module_module-harvest..moduleHarvest.defaultArgData)
+    * [.argMerge()](#module_module-harvest..moduleHarvest.argMerge)
+    * [.prefaceLinkArgs()](#module_module-harvest..moduleHarvest.prefaceLinkArgs)
+    * [.objLinkArgs()](#module_module-harvest..moduleHarvest.objLinkArgs)
+    * [.existingFiles()](#module_module-harvest..moduleHarvest.existingFiles)
+    * [.runTrackDevDeps()](#module_module-harvest..moduleHarvest.runTrackDevDeps)
+    * [.deps()](#module_module-harvest..moduleHarvest.deps)
+    * [.removeEmoji()](#module_module-harvest..moduleHarvest.removeEmoji)
+    * [.designateDeps()](#module_module-harvest..moduleHarvest.designateDeps)
+    * [.debugMsg()](#module_module-harvest..moduleHarvest.debugMsg)
+    * [.debugCatch()](#module_module-harvest..moduleHarvest.debugCatch)
+    * [.writePackage()](#module_module-harvest..moduleHarvest.writePackage)
+    * [.buildLinks()](#module_module-harvest..moduleHarvest.buildLinks)
+    * [.detectBin()](#module_module-harvest..moduleHarvest.detectBin)
+    * [.packageBin()](#module_module-harvest..moduleHarvest.packageBin)
+
+<a name="module_module-harvest..moduleHarvest"></a>
+### module-harvest~moduleHarvest()
+Tracks down package dependencies, and local, main, and bin files.
+
+**Kind**: inner method of <code>[module-harvest](#module_module-harvest)</code>  
+
+* [~moduleHarvest()](#module_module-harvest..moduleHarvest)
+  * [.defaultArgs](#module_module-harvest..moduleHarvest.defaultArgs)
+  * [.configFiles](#module_module-harvest..moduleHarvest.configFiles)
+  * [.defaultArgData()](#module_module-harvest..moduleHarvest.defaultArgData)
+  * [.argMerge()](#module_module-harvest..moduleHarvest.argMerge)
+  * [.prefaceLinkArgs()](#module_module-harvest..moduleHarvest.prefaceLinkArgs)
+  * [.objLinkArgs()](#module_module-harvest..moduleHarvest.objLinkArgs)
+  * [.existingFiles()](#module_module-harvest..moduleHarvest.existingFiles)
+  * [.runTrackDevDeps()](#module_module-harvest..moduleHarvest.runTrackDevDeps)
+  * [.deps()](#module_module-harvest..moduleHarvest.deps)
+  * [.removeEmoji()](#module_module-harvest..moduleHarvest.removeEmoji)
+  * [.designateDeps()](#module_module-harvest..moduleHarvest.designateDeps)
+  * [.debugMsg()](#module_module-harvest..moduleHarvest.debugMsg)
+  * [.debugCatch()](#module_module-harvest..moduleHarvest.debugCatch)
+  * [.writePackage()](#module_module-harvest..moduleHarvest.writePackage)
+  * [.buildLinks()](#module_module-harvest..moduleHarvest.buildLinks)
+  * [.detectBin()](#module_module-harvest..moduleHarvest.detectBin)
+  * [.packageBin()](#module_module-harvest..moduleHarvest.packageBin)
+
+<a name="module_module-harvest..moduleHarvest.defaultArgs"></a>
+#### moduleHarvest.defaultArgs
+object of arguments and default values
+
+**Kind**: static property of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.configFiles"></a>
+#### moduleHarvest.configFiles
+acceptable config files
+
+**Kind**: static property of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.defaultArgData"></a>
+#### moduleHarvest.defaultArgData()
+default set of arguments totally overwritable or appendable
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.argMerge"></a>
+#### moduleHarvest.argMerge()
+merge two object's arrays
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+**See**: [https://lodash.com/docs#merge](https://lodash.com/docs#merge)  
+<a name="module_module-harvest..moduleHarvest.prefaceLinkArgs"></a>
+#### moduleHarvest.prefaceLinkArgs()
+prefaces hard links path arguments from array of args [src, dst]
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.objLinkArgs"></a>
+#### moduleHarvest.objLinkArgs()
+convert array of [src, dst] links to object
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.existingFiles"></a>
+#### moduleHarvest.existingFiles()
+returns existing files from array of files
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.runTrackDevDeps"></a>
+#### moduleHarvest.runTrackDevDeps()
+get all the possible test files
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.deps"></a>
+#### moduleHarvest.deps()
+get the deps for all files and test files
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.removeEmoji"></a>
+#### moduleHarvest.removeEmoji()
+removes github style emoji froms sring
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.designateDeps"></a>
+#### moduleHarvest.designateDeps()
+assign versions to dependencies via given pacakge
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.debugMsg"></a>
+#### moduleHarvest.debugMsg()
+debug message from promise then
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.debugCatch"></a>
+#### moduleHarvest.debugCatch()
+catch message for debug from promise catch
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.writePackage"></a>
+#### moduleHarvest.writePackage()
+write pacakge from existing, backup, or generate fresh
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.buildLinks"></a>
+#### moduleHarvest.buildLinks()
+make hard links
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.detectBin"></a>
+#### moduleHarvest.detectBin()
+detects if files have shebang declaration
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_module-harvest..moduleHarvest.packageBin"></a>
+#### moduleHarvest.packageBin()
+readys array of bin files for package.bin
+
+**Kind**: static method of <code>[moduleHarvest](#module_module-harvest..moduleHarvest)</code>  
+<a name="module_test-markdown"></a>
+## test-markdown
+:fishing_pole_and_fish: Evaluates javascript code blocks from markdown files.
+
+**Package.keywords**: eval, evaulate, javascript, markdown, test  
+**Package.preferglobal**:   
+**Package.repository.type**: git  
+**Package.repository.url**: https://github.com/reggi/node-eval-js-md  
+
+* [test-markdown](#module_test-markdown)
+  * [~testMarkdown()](#module_test-markdown..testMarkdown)
+    * [.prependPaths()](#module_test-markdown..testMarkdown.prependPaths)
+    * [.files()](#module_test-markdown..testMarkdown.files)
+    * [.getJsFromHTML()](#module_test-markdown..testMarkdown.getJsFromHTML)
+
+<a name="module_test-markdown..testMarkdown"></a>
+### test-markdown~testMarkdown()
+evaluates a dir of md files or a single file
+
+**Kind**: inner method of <code>[test-markdown](#module_test-markdown)</code>  
+
+* [~testMarkdown()](#module_test-markdown..testMarkdown)
+  * [.prependPaths()](#module_test-markdown..testMarkdown.prependPaths)
+  * [.files()](#module_test-markdown..testMarkdown.files)
+  * [.getJsFromHTML()](#module_test-markdown..testMarkdown.getJsFromHTML)
+
+<a name="module_test-markdown..testMarkdown.prependPaths"></a>
+#### testMarkdown.prependPaths()
+prepends array items with dir path
+
+**Kind**: static method of <code>[testMarkdown](#module_test-markdown..testMarkdown)</code>  
+<a name="module_test-markdown..testMarkdown.files"></a>
+#### testMarkdown.files()
+takes array of files, parses md, parses html, html entities, evals
+
+**Kind**: static method of <code>[testMarkdown](#module_test-markdown..testMarkdown)</code>  
+<a name="module_test-markdown..testMarkdown.getJsFromHTML"></a>
+#### testMarkdown.getJsFromHTML()
+selecting the js code html blocks in the dom
+
+**Kind**: static method of <code>[testMarkdown](#module_test-markdown..testMarkdown)</code>  
 <a name="arrCamelize"></a>
 ## arrCamelize(arr) ⇒ <code>String</code>
 Joins array and camel cases each word
@@ -276,6 +472,44 @@ Flatten a array-object via recursive property
 turn the contents of array or object into sorted string
 
 **Kind**: global function  
+<a name="binDoc"></a>
+## binDoc()
+assemble a bin help output from a object
+
+**Kind**: global function  
+
+* [binDoc()](#binDoc)
+  * [.longestString()](#binDoc.longestString)
+  * [.calculateSpaces()](#binDoc.calculateSpaces)
+  * [.buildUsage()](#binDoc.buildUsage)
+  * [.prefixItems()](#binDoc.prefixItems)
+  * [.buildOptions()](#binDoc.buildOptions)
+
+<a name="binDoc.longestString"></a>
+### binDoc.longestString()
+given an array, will return char count of longest string
+
+**Kind**: static method of <code>[binDoc](#binDoc)</code>  
+<a name="binDoc.calculateSpaces"></a>
+### binDoc.calculateSpaces()
+calculate spaces in betwee field and desc
+
+**Kind**: static method of <code>[binDoc](#binDoc)</code>  
+<a name="binDoc.buildUsage"></a>
+### binDoc.buildUsage()
+build usage object
+
+**Kind**: static method of <code>[binDoc](#binDoc)</code>  
+<a name="binDoc.prefixItems"></a>
+### binDoc.prefixItems()
+prefix array items
+
+**Kind**: static method of <code>[binDoc](#binDoc)</code>  
+<a name="binDoc.buildOptions"></a>
+### binDoc.buildOptions()
+build options object
+
+**Kind**: static method of <code>[binDoc](#binDoc)</code>  
 <a name="fauxProject"></a>
 ## fauxProject()
 creates a dummy project in the current directory
@@ -406,4 +640,25 @@ Given stats from fs.lstat or fs.stat will return type
 | Param | Type |
 | --- | --- |
 | stats | <code>Object</code> | 
+
+<a name="instanceOf"></a>
+## instanceOf()
+returns true if value is instance of object or string name
+
+**Kind**: global function  
+<a name="moduleBin"></a>
+## moduleBin(filePath, args, [functionMethod], [type], [toLog], [toThrow], [toStringify])
+Proxy the execution of an entire node module.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| filePath | <code>String</code> | Path to main javascript file. |
+| args | <code>Array</code> | Array of arguments to apply to the function. |
+| [functionMethod] | <code>String</code> | String of specific function method to execute |
+| [type] | <code>String</code> | Type of function to run (promise||callback) |
+| [toLog] | <code>Boolean</code> | Option to log the output (defaults true). |
+| [toThrow] | <code>Boolean</code> | Option to throw error (defaults true). |
+| [toStringify] | <code>Boolean</code> | Option to JSON.stringify output (defaults true). |
 
