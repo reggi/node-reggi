@@ -1,6 +1,8 @@
 # Module Harvest
 
-I just invented something I've dubbed `module harvesting`. It's a method of automated Node.js module creation. What does that mean?
+[![Build Status](https://travis-ci.org/reggi/node-module-harvest.svg)](https://travis-ci.org/reggi/node-module-harvest) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
+
+I've invented something dubbed `module harvesting`. It's a method of automated Node.js module creation. What does that mean?
 
 Do you ever find yourself creating a project and needing to use functions you've already built in other projects? If the functions are a couple of lines long you can find yourself copying and pasting them in your project every time you use them. Why didn't you put it on NPM the first time? We're told that monolithic apps are bad, but they need to take shape that way, then down the road your supposed to refactor. I absolutely hate this paradigm. The reason you didn't put it that three line function on `npm` the first time is because there's way to much overhead in creating the repo, publishing, documentation, tests, and setting dependencies. Module Harvesting is here to help.
 
