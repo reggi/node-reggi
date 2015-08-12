@@ -6,29 +6,30 @@ var fs = Promise.promisifyAll(require('fs-extra'))
 var path = require('path')
 var chdirTemp = require('../test-chdir-temp')
 var DESC = path.basename(__filename, path.extname(__filename))
-var moduleLink = require('../module-link')
+var moduleAssign = require('../module-assign')
 
 /* global describe, it */
 
 describe(DESC, function () {
   chdirTemp(); if (!GLOBAL.fsmock) throw new Error('no mock')
 
-  describe('moduleLink()', function () {
-    it('should create module link', function () {
+  describe('moduleAssign()', function () {
+    it('should assign module', function () {
       fs.writeFileSync('./package.json', '{}')
       fs.writeFileSync('./alpha.js')
       fs.mkdirSync('node_modules')
-      return moduleLink('./alpha.js').then(function () {
+      return moduleAssign('./alpha.js').then(function () {
         var moduleDst = fs.readdirSync('node_modules/alpha')
         var modulePkg = fs.readJsonSync('node_modules/alpha/package.json')
         var thisPkg = fs.readJsonSync('package.json')
         assert.deepEqual(moduleDst, ['package.json'])
         assert.deepEqual(modulePkg, {
           'main': '../../alpha.js',
-          'name': 'alpha'
+          'name': 'alpha',
+          'assignedModule': true
         })
         assert.deepEqual(thisPkg, {
-          'linkedDependencies': {
+          'localDependencies': {
             'alpha': './alpha.js'
           }
         })
@@ -36,22 +37,23 @@ describe(DESC, function () {
     })
   })
 
-  describe('moduleLink.all()', function () {
-    it('should create module link', function () {
+  describe('moduleAssign.all()', function () {
+    it('should assign all modules', function () {
       fs.writeFileSync('./package.json', '{}')
       fs.writeFileSync('./alpha.js')
       fs.mkdirSync('node_modules')
-      return moduleLink.all(['./alpha.js']).then(function () {
+      return moduleAssign.all(['./alpha.js']).then(function () {
         var moduleDst = fs.readdirSync('node_modules/alpha')
         var modulePkg = fs.readJsonSync('node_modules/alpha/package.json')
         var thisPkg = fs.readJsonSync('package.json')
         assert.deepEqual(moduleDst, ['package.json'])
         assert.deepEqual(modulePkg, {
           'main': '../../alpha.js',
-          'name': 'alpha'
+          'name': 'alpha',
+          'assignedModule': true
         })
         assert.deepEqual(thisPkg, {
-          'linkedDependencies': {
+          'localDependencies': {
             'alpha': './alpha.js'
           }
         })
@@ -59,21 +61,22 @@ describe(DESC, function () {
     })
   })
 
-  describe('moduleLink.install()', function () {
-    it('should link modules from package', function () {
+  describe('moduleAssign.install()', function () {
+    it('should assign modules from package', function () {
       fs.writeJsonSync('./package.json', {
-        'linkedDependencies': {
+        'localDependencies': {
           'alpha': './alpha.js'
         }
       })
       fs.mkdirSync('node_modules')
-      return moduleLink.install().then(function () {
+      return moduleAssign.install().then(function () {
         var moduleDst = fs.readdirSync('./node_modules/alpha')
         var modulePkg = fs.readJsonSync('./node_modules/alpha/package.json')
         assert.deepEqual(moduleDst, ['package.json'])
         assert.deepEqual(modulePkg, {
           'main': '../../alpha.js',
-          'name': 'alpha'
+          'name': 'alpha',
+          'assignedModule': true
         })
       })
     })

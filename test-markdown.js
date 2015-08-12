@@ -1,3 +1,4 @@
+var path = require('path')
 var _ = require('lodash')
 var Entities = require('html-entities').AllHtmlEntities
 var cheerio = require('cheerio')
@@ -20,12 +21,12 @@ var umd = require('acorn-umd')
  */
 
 /** evaluates a dir of md files or a single file */
-function testMarkdown (files, output) {
+function testMarkdown (files, output, prepend) {
   return fs.readFileAsync('./package.json')
   .then(JSON.parse)
   .catch(function () { return false })
   .then(function (pkg) {
-    return testMarkdown.files(files, pkg)
+    return testMarkdown.files(files, pkg, prepend)
   })
   .then(function (code) {
     if (output) console.log(JSON.stringify(code))
@@ -34,7 +35,7 @@ function testMarkdown (files, output) {
 }
 
 /** takes array of files, parses md, parses html, html entities, evals */
-testMarkdown.files = function (files, pkg) {
+testMarkdown.files = function (files, pkg, prepend) {
   files = _.flatten([files])
   return Promise.map(files, function (file) {
     return fs.readFileAsync(file, 'utf8')
@@ -47,6 +48,7 @@ testMarkdown.files = function (files, pkg) {
         es6: true, amd: true, cjs: true
       })
       var charsAdded = 0
+      // change package if required
       _.each(deps, function (dep) {
         if (pkg && pkg.main && dep.source.value === pkg.name) {
           var start = charsAdded + dep.source.start + 1
@@ -55,6 +57,19 @@ testMarkdown.files = function (files, pkg) {
           charsAdded += Math.abs(pkg.main.length - dep.source.value.length)
         }
       })
+      // prefix local modules with dir
+      if (prepend)
+        var localRegex = /^.\.\/|^.\/|^\//
+        _.each(deps, function (dep) {
+          if (dep.source.value.match(localRegex)) {
+            var start = charsAdded + dep.source.start + 1
+            var end = charsAdded + dep.source.end - 1
+            var newRef = path.join(prepend, dep.source.value)
+            code = testMarkdown.replacePosition(code, start, end, newRef)
+            charsAdded += Math.abs(newRef.length - dep.source.value.length)
+          }
+        })
+      }
       _eval(code, file, {}, true)
       return code
     })
@@ -72,7 +87,8 @@ testMarkdown.getJsFromHTML = function (mdContent) {
   var code = $('code.lang-javascript, code.lang-js')
   var codeHtml = []
   code.map(function () {
-    codeHtml.push($(this).html())
+    var block = $(this).html()
+    if (!block.match(/^\/\/ prevent eval/)) codeHtml.push(block)
   })
   return codeHtml.join('\n')
 }

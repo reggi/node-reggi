@@ -220,9 +220,11 @@ describe(DESC, function () {
       })
     })
 
-    it('should return value when harvest.config.json returns function', function () {
+    it('should return value when harvest.config.js returns function', function () {
       var data = {'foo': 'bar'}
-      fs.writeFileAsync('./harvest.config.js', util.format('module.exports = function () { return %s }', JSON.stringify(data)))
+      var content = util.format('module.exports = function () { return %s }', JSON.stringify(data))
+      fs.writeFileAsync('./harvest.config.js', content)
+      // console.log(content)
       return moduleHarvest.configFileArgs()
       .then(function (value) {
         assert.deepEqual(value, data)

@@ -1,6 +1,6 @@
 # Module Harvest
 
-[![Build Status](https://travis-ci.org/reggi/node-module-harvest.svg)](https://travis-ci.org/reggi/node-module-harvest) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
+[![Build Status](https://travis-ci.org/reggi/module-harvest.svg?branch=master)](https://travis-ci.org/reggi/module-harvest) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
 I've invented something dubbed `module harvesting`. It's a method of automated Node.js module creation. What does that mean?
 

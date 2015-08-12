@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var minimist = require('minimist')
 var argv = minimist(process.argv.slice(2))
-var moduleLink = require('../module-link')
+var moduleAssign = require('../module-assign')
 var pkg = require('../package.json')
 var binDoc = require('../bin-doc')
 
@@ -13,19 +13,35 @@ var doc = {
     '<files> [<name>]': 'Javascript file.',
     '--help | -h': 'Shows this help message.',
     '--version | -v': 'Show package version.',
-    '--install | -i': 'Installs link modules from package.',
-    '--all | -a': 'Installs link modules from glob.'
+    '--install | -i': 'Installs link modules from package.'
+  },
+  'options': {
+    'name': 'The name of the module. (Only works when one file is passed.)'
+  },
+  'optionAliases': {
+    'name': '-n'
   }
 }
 
+var name = argv.n || argv.name || false
+
 if (argv.v || argv.version) {
   console.log(pkg.version)
+
 } else if (argv.i || argv.install) {
-  moduleLink.install()
-} else if (argv.a || argv.all) {
-  moduleLink.all(argv._)
+
+  moduleAssign.install()
+
+} else if (name) {
+
+  moduleAssign(argv._[0], name)
+
 } else if (argv._.length) {
-  moduleLink.apply(null, argv._)
+
+  moduleAssign.all(argv._)
+
 } else {
+
   console.log(binDoc(doc))
+
 }

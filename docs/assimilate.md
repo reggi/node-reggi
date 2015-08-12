@@ -4,7 +4,7 @@ The assimilate function is does something very interesting, it takes an argument
 
 ```javascript
 var assert = require('assert')
-var assimilate = require('../assimilate')
+var assimilate = require('./assimilate')
 ```
 
 Here you can see it works on arrays.
