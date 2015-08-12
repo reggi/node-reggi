@@ -1,0 +1,28 @@
+{
+  "name": "module-assign",
+  "version": "0.0.1",
+  "main": "module-assign.js",
+  "author": "Thomas Reggi <thomas@reggi.com>",
+  "description": "Assigns local javascript files to a module.",
+  "bin": {
+    "module-assign": "bin/module-assign.js"
+  },
+  "licence": "MIT",
+  "preferglobal": true,
+  "dependencies": {
+    "bluebird": "^2.9.34",
+    "debug": "^2.2.0",
+    "fs-extra": "reggi/node-fs-extra#enhanced",
+    "lodash": "^3.10.0",
+    "minimist": "^1.1.2"
+  },
+  "scripts": {
+    "test": "standard && mocha"
+  },
+  "keywords": [
+    "module",
+    "assign",
+    "link",
+    "npm"
+  ]
+}
