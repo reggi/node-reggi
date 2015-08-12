@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "module-assign.js",
   "author": "Thomas Reggi <thomas@reggi.com>",
-  "description": "Assigns local javascript files to a module.",
+  "description": "Assign a local javascript file to a module of it's very own.",
   "bin": {
     "module-assign": "bin/module-assign.js"
   },

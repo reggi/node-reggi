@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/reggi/module-harvest.svg?branch=master)](https://travis-ci.org/reggi/module-assign) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
-Assign a module name to a local javascript file. Have you ever wanted to `require()` a file absolutely as a module, but without installing or linking it? This program has you covered.
+Assign a local javascript file to a module of it's very own. Have you ever wanted to `require()` a file absolutely as a module, but without installing or linking it? This program has you covered.
 
 ```
 npm install module-assign -g

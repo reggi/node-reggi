@@ -5,7 +5,7 @@ var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs-extra'))
 
 /**
- * :seat: Assigns local javascript files to a module.
+ * :seat: Assign a local javascript file to a module of it's very own.
  * @module module-assign
  * @package.keywords module, assign, link, npm
  * @package.preferGlobal
