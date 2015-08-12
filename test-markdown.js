@@ -58,7 +58,7 @@ testMarkdown.files = function (files, pkg, prepend) {
         }
       })
       // prefix local modules with dir
-      if (prepend)
+      if (prepend) {
         var localRegex = /^.\.\/|^.\/|^\//
         _.each(deps, function (dep) {
           if (dep.source.value.match(localRegex)) {
