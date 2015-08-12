@@ -8,6 +8,18 @@ Assign a local javascript file to a module of it's very own. Have you ever wante
 npm install module-assign -g
 ```
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Why](#why)
+- [Example](#example)
+  - [The Setup](#the-setup)
+  - [The Result](#the-result)
+  - [Assign Modules in `localDependencies`](#assign-modules-in-localdependencies)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Why
 
 Normally if you wanted to include the local file `/lib/index.js` assuming you're in the root directory you would do this.
@@ -28,41 +40,90 @@ I created [`module-harvest`](https://github.com/reggi/module-harvest) (a differe
 
 This project uses the property `localDependencies` within `package.json` to save references to `localDependencies`.
 
-## Usage
+## Example
 
-Below we run the command and pass in a file and use [`tree`](http://mama.indstate.edu/users/ice/tree/) and [`json`](https://github.com/trentm/json) to view the results of running the command.
+### The Setup
 
-```bash
-module-assign ./arr-camelize.js
-# inspect the newly changes / created files
-tree ./node_modules/arr-camelize
-# ./node_modules/arr-camelize
-# └── package.json
-cat ./node_modules/arr-camelize/package.json | json
-# {
-# "name": "arr-camelize",
-# "main": "../../arr-camelize.js",
-# "assignedModule": true
-# }
-cat package.json | json localDependencies.arr-camelize
-# ./arr-camelize.js
+Here's a directory structure.
+
+```
+.
+├── alpha.js
+├── beta.js
+├── node_modules
+└── package.json
 ```
 
-This does the following:
+The contents of `alpha.js` are the following:
 
-* Adds the directory `arr-camelize` within `node_modules`.
-* Creates a module `package.json` with `name` and `main`
-* Adds `arr-camelize` to the `localDependencies` obj within `./package.json`
+```javascript
+module.exports = 'this is alpha'
+```
 
-If ran with `DEBUG=*` you can have a more verbose output
+The contents of `beta.js` are the following:
+
+[](#preventeval)
+```javascript
+var alpha = require('alpha')
+console.log(alpha)
+```
+
+You can see that the call to alpha is `alpha` and not `./alpha.js`, which will thrown an error because no `alpha` module exists.
+
+The contents of `packge.json` are the following:
+
+```json
+{
+  "name": "test",
+  "version": "1.0.0"
+}
+```
+
+### The Result
+
+The `module-assign` is run with the `./alpha.js` file as an argument.
 
 ```bash
-DEBUG=* ./bin/module-assign.js ./arr-camelize.js
-#  module-assign file read package.json +0ms
-#  module-assign dirs made node_modules/arr-camelize +7ms
-#  module-assign file written node_modules/arr-camelize/package.json +4ms
-#  module-assign file written ./package.json +11ms
+module-assign ./alpha.js
 ```
+
+The directory now looks like this.
+
+```
+.
+├── alpha.js
+├── beta.js
+├── node_modules
+│   └── alpha
+│       └── package.json
+└── package.json
+```
+
+You can see `node_modules`, `node_modules/alpha`, `node_modules/alpha/package.json`, have all been created.
+
+The contents of `node_modules/alpha/package.json` look like this:
+
+```json
+{
+  "name": "alpha",
+  "main": "../../alpha.js",
+  "assignedModule": true
+}
+```
+
+The contents of `package.json` are also changed.
+
+```json
+{
+  "name": "test",
+  "version": "1.0.0",
+  "localDependencies": {
+    "alpha": "./alpha.js"
+  }
+}
+```
+
+You can see that `localDependencies` was added with `alpha` as a property.
 
 ### Assign Modules in `localDependencies`
 
