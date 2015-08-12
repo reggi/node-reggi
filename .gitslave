@@ -2,3 +2,4 @@
 "https://github.com/reggi/evalmd.git" "./local_modules/evalmd"
 "https://github.com/reggi/module-harvest.git" "./local_modules/module-harvest"
 "https://github.com/reggi/evalmd.git" "./local_modules/evalmd"
+"https://github.com/reggi/module-assign.git" "./local_modules/module-assign"
