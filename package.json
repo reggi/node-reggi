@@ -4,7 +4,7 @@
   "description": "A collection of functions.",
   "scripts": {
     "pretest": "./bin/module-assign.js ./test-markdown.js --name=evalmd && ./bin/module-assign.js ./module-assign.js",
-    "test": "standard && evalmd ./docs/*.md --prepend='..' && && mocha ",
+    "test": "standard && evalmd ./docs/*.md --prepend='..' && mocha ",
     "doc-toc": "doctoc ./docs --github",
     "doc-api": "jsdoc2md \"./*.js\" > API.md",
     "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js",
