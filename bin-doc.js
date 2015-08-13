@@ -72,6 +72,7 @@ binDoc.prefixItems = function (arr, prefix) {
   return _.chain(arr)
   .map(function (item) {
     if (item.substr(0, 1) === '-') return item
+    if (item.length === 1) return '-' + item
     return prefix + item
   })
   .value()
