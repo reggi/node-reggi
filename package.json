@@ -4,16 +4,28 @@
   "description": "A collection of functions.",
   "scripts": {
     "pretest": "./bin/module-assign.js ./test-markdown.js --name=evalmd && ./bin/module-assign.js ./module-assign.js",
-    "test": "standard && mocha && ./bin/test-markdown.js ./docs/*.md --prepend='..'",
+    "test": "standard && evalmd ./docs/*.md --prepend='..' && && mocha ",
     "doc-toc": "doctoc ./docs --github",
     "doc-api": "jsdoc2md \"./*.js\" > API.md",
-    "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js"
+    "build-harvest": "npm run doc-toc && npm run doc-api && ./bin/module-harvest.js ./module-harvest.js",
+    "code-coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "test-travis": "standard && evalmd ./docs/*.md --prepend='..' && npm run code-coverage",
+    "soups": "./bin/run-scripts 'soup-*'",
+    "soup-clam": "echo 'clam soup'",
+    "soup-cream": "exit 1",
+    "soup-mushroom": "echo 'cream mushroom'",
+    "salad-house": "echo 'house salad'",
+    "salad-cesar": "exit 1",
+    "salad-chicken": "echo 'chicken salad'"
   },
   "author": "Thomas Reggi <thomas@reggi.com>",
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.2.0",
     "chai-as-promised": "^5.1.0",
+    "coveralls": "^2.11.3",
+    "mocha": "^2.2.5",
+    "mocha-lcov-reporter": "0.0.2",
     "mock-fs": "^3.0.0"
   },
   "dependencies": {
@@ -32,6 +44,7 @@
     "jsdoc-to-markdown": "^1.1.1",
     "lodash": "^3.10.0",
     "marked": "^0.3.5",
+    "minimatch": "^2.0.10",
     "minimist": "^1.1.2",
     "octonode": "^0.7.1",
     "ramda": "^0.17.1",
