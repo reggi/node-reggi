@@ -1,39 +1,66 @@
 #!/usr/bin/env node
-var minimist = require('minimist')
-var argv = minimist(process.argv.slice(2))
 var testMarkdown = require('../test-markdown')
-var pkg = require('../package.json')
-var binDoc = require('../bin-doc')
+var yargs = require('yargs')
+var argv = yargs
+  .usage('$0 - Evaluate the javascript in markdown files')
+  .example('$0 <file(s)>', 'Evaluate file(s)')
+  .example('$0 <file(s)> -n', 'Evaluate file(s) uninterrupted')
+  .example('$0 <file(s)> -b', 'Evaluate block(s)')
+  .example('$0 <file(s)> -bn', 'Evaluate block(s) uninterrupted')
+  .example('$0 <file(s)> -Po', 'Outputs js file(s)')
+  .example('$0 <file(s)> -Pio', 'Outputs js file(s) with all block(s) (for linting)')
+  .example('$0 <file(s)> -Pob', 'Outputs block(s)')
+  .example('$0 <file(s)> -Piob', 'Outputs all blocks(s) (for linting)')
+  .default('i', false)
+  .alias('i', 'include')
+  .describe('i', 'Includes prevented blocks')
+  .default('P', false)
+  .alias('P', 'prevent')
+  .describe('P', 'Prevent code from being evaluated')
+  .default('b', false)
+  .alias('b', 'block')
+  .describe('b', 'Change the scope to block level')
+  .default('o', false)
+  .alias('o', 'output')
+  .describe('o', 'Output js')
+  .default('n', false)
+  .alias('n', 'nonstop')
+  .describe('n', 'Runs all files regardless if error')
+  .default('s', false)
+  .alias('s', 'silent')
+  .describe('s', 'Silence `evalmd` logging')
+  .default('u', false)
+  .alias('u', 'uniform')
+  .describe('u', 'Does not use absolute urls when error logging')
+  .default('d', false)
+  .alias('d', 'delimeter')
+  .describe('d', 'Stdout delimeter')
+  .help('h')
+  .alias('h', 'help')
+  .describe('path', 'Prefix local module with path')
+  .default('path', './')
+  .describe('package', 'Th path of a package.json')
+  .default('package', './package.json')
+  .version(function () {
+    return require('../package').version
+  })
+  .wrap(null)
+  .argv
 
-var doc = {
-  'name': pkg.name,
-  'desc': pkg.description,
-  'usage': {
-    '<file|files>': 'File or files via glob.',
-    '--help | -h': 'Shows this help message.',
-    '--version | -v': 'Show package version.'
-  },
-  'options': {
-    'output': 'Logs the stirng output of code.',
-    'prepend': 'Prepends all local module loads with path.'
-  },
-  'optionAliases': {
-    'output': ['-o']
-  }
-}
+var files = argv._
 
-if (argv.v || argv.version) {
-
-  console.log(pkg.version)
-
-} else if (argv._.length) {
-
-  var output = argv.output || argv.o || false
-  var prepend = argv.prepend || false
-  testMarkdown(argv._, output, prepend)
-
-} else {
-
-  console.log(binDoc(doc))
-
-}
+testMarkdown(
+  files,
+  argv.path,
+  argv.uniform,
+  argv.nonstop,
+  argv.block,
+  argv.silent,
+  argv.prevent,
+  argv.include,
+  argv.output,
+  argv.delimeter,
+  argv.package
+).then(function (results) {
+  process.exit(results.exitCode)
+})

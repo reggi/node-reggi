@@ -2,6 +2,7 @@
   "name": "reggi",
   "version": "0.0.1",
   "description": "A collection of functions.",
+  "main": "arr-camelize.js",
   "scripts": {
     "pretest": "./bin/module-assign.js ./test-markdown.js --name=evalmd && ./bin/module-assign.js ./module-assign.js",
     "test": "standard && evalmd ./docs/*.md --prepend='..' && mocha ",
@@ -26,16 +27,19 @@
     "coveralls": "^2.11.3",
     "mocha": "^2.2.5",
     "mocha-lcov-reporter": "0.0.2",
-    "mock-fs": "^3.0.0"
+    "mock-fs": "^3.0.0",
+    "nixt": "^0.4.1"
   },
   "dependencies": {
     "acorn": "^2.1.0",
     "acorn-umd": "^0.4.0",
     "argx": "^1.1.5",
     "bluebird": "^2.9.34",
+    "chalk": "^1.1.0",
     "cheerio": "^0.19.0",
     "debug": "^2.2.0",
     "dotty": "0.0.2",
+    "error-stack-parser": "^1.2.2",
     "eval": "^0.1.0",
     "fs-extra": "reggi/node-fs-extra#enhanced",
     "graceful-fs": "^4.1.2",
@@ -46,11 +50,17 @@
     "marked": "^0.3.5",
     "minimatch": "^2.0.10",
     "minimist": "^1.1.2",
+    "moment": "^2.10.6",
     "octonode": "^0.7.1",
+    "pretty-error": "^1.1.2",
     "ramda": "^0.17.1",
     "simple-git": "^1.7.0",
     "sorted-object": "^1.0.0",
-    "underscore": "^1.8.3"
+    "stack-trace": "0.0.9",
+    "stacktrace-js": "^0.6.4",
+    "underscore": "^1.8.3",
+    "underscore.string": "^3.1.1",
+    "yargs": "^3.19.0"
   },
   "localDependencies": {
     "arr-camelize": "./arr-camelize.js",
