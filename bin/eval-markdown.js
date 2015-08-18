@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-var testMarkdown = require('../test-markdown')
 var yargs = require('yargs')
+var evalMarkdown = require('../eval-markdown')
 var argv = yargs
   .usage('$0 - Evaluate the javascript in markdown files')
   .example('$0 <file(s)>', 'Evaluate file(s)')
@@ -49,18 +49,16 @@ var argv = yargs
 
 var files = argv._
 
-testMarkdown(
+evalMarkdown(
   files,
-  argv.path,
-  argv.uniform,
-  argv.nonstop,
-  argv.block,
-  argv.silent,
-  argv.prevent,
-  argv.include,
-  argv.output,
-  argv.delimeter,
-  argv.package
-).then(function (results) {
-  process.exit(results.exitCode)
-})
+  argv.path, // prependPath
+  argv.uniform, // uniformPath
+  argv.nonstop, // nonstop
+  argv.block, // blockScope
+  argv.silent, // silence
+  argv.prevent, // preventEval
+  argv.include, // includePrevented
+  argv.output, // output
+  argv.delimeter, // stdoutDelimeter
+  argv.package // packagePath
+)

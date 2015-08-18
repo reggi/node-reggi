@@ -153,13 +153,21 @@ defaultStack.fileOnward = function (e, file) {
 /** get the line:char from string */
 defaultStack.parseLineChar = function (s) {
   if (s instanceof Error && s.message) s = s.message
-  var pattern = /(\d+):(\d+)/
-  var match = s.match(pattern)
-  if (match) {
-    match.lineChar = match[0]
-    match.line = parseInt(match[1], 10)
-    match.char = parseInt(match[2], 10)
-    return match
+  var patternLineChar = /:(\d+):(\d+)/
+  var patternLine = /:(\d+)/
+
+  var matchLineChar = s.match(patternLineChar)
+  var matchLine = s.match(patternLine)
+  if (matchLineChar) {
+    matchLineChar.lineChar = matchLineChar[0]
+    matchLineChar.line = parseInt(matchLineChar[1], 10)
+    matchLineChar.char = parseInt(matchLineChar[2], 10)
+    return matchLineChar
+  } else if (matchLine) {
+    matchLine.lineChar = parseInt(matchLine[1], 10)
+    matchLine.line = parseInt(matchLine[1], 10)
+    matchLine.char = false
+    return matchLine
   }
   return false
 }

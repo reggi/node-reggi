@@ -1,3 +1,26 @@
+# `evalmd` Prevent Eval
+
+The `preventEval` declaration allows you to prevent a code block from being evaluated.  There are two different ways of declaring a code block. One is to use an `anchor`. Here's an example:
+
+    [](#preventEval)
+    ```js
+    module.exports = 'alpha-path'
+    ```
+
+When adding a `preventEval` declaration in this way the name of the file is the `text` content of the anchor. Another way to declare a block as a file is using a comment. Here's an example:
+
+    ```js
+    // preventEval
+    module.exports = 'alpha-path'
+    ```
+
+When the first line of a code block is a comment with the word `preventEval` in front the string after will be interpreted as the file.
+
+> Note. The match patterns for `prevent eval` and `preventEval` are case-insensitive. So `pReVenTeVaL` works just as well.
+
+## Examples
+
+### Evaluated Blocks
 
 ```javascript
 ```
@@ -38,6 +61,8 @@ assert.equal(x, true)
 var x = true
 assert.equal(x, true)
 ```
+
+### Blocks prevented with anchor
 
 [](#prevent eval)
 ```js
@@ -125,6 +150,8 @@ var x = true
 assert.equal(x, true)
 ```
 
+### Blocks prevents with comment
+
 ```javascript
 // prevent eval
 ```
@@ -199,7 +226,8 @@ assert.equal(x, true)
 var assert = require('assert')
 ```
 
+### Valid block
+
 ```javascript
-// var x /= false
 assert.equal(true, true)
 ```

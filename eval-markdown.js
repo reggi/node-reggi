@@ -1,19 +1,17 @@
-// var ParsedError = require('pretty-error/lib/parsed-error')
-// var PrettyError = require('pretty-error');
 var crypto = require('crypto')
 var path = require('path')
 var _ = require('lodash')
 var cheerio = require('cheerio')
 var marked = require('marked')
 var Promise = require('bluebird')
-var fs = Promise.promisifyAll(require('fs'))
+var fs = Promise.promisifyAll(require('fs-extra'))
 var markedAsync = Promise.promisify(marked)
 var _eval = require('eval')
 var acorn = require('acorn')
 var umd = require('acorn-umd')
 var chalk = require('chalk')
 var S = require('underscore.string')
-var defaultStack = require('./default-stack')
+var os = require('os')
 var promisePropsRipple = require('./promise-props-ripple')
 
 /**
@@ -21,12 +19,11 @@ var promisePropsRipple = require('./promise-props-ripple')
  * @module evalmd
  * @package.keywords eval, evaulate, javascript, markdown, test
  * @package.preferGlobal
- * @package.scripts.test ./bin/test-markdown.js ./README.md
- * @package.bin.evalmd ./bin/test-markdown.js
- * @package.bin.test-markdown ./bin/test-markdown.js
- * @package.bin.eval-markdown ./bin/test-markdown.js
+ * @package.scripts.test ./bin/eval-markdown.js ./README.md
+ * @package.bin.evalmd ./bin/eval-markdown.js
+ * @package.bin.test-markdown ./bin/eval-markdown.js
+ * @package.bin.eval-markdown ./bin/eval-markdown.js
  */
-
 function evalMarkdown (file$, prependPath, uniformPath, nonstop, blockScope, silence, preventEval, includePrevented, output, stdoutDelimeter, packagePath) {
   evalMarkdown.log = evalMarkdown.writeStderr(evalMarkdown.stderr, silence)
   evalMarkdown.logInfo('it worked if it ends with', 'ok')
@@ -67,9 +64,24 @@ function evalMarkdown (file$, prependPath, uniformPath, nonstop, blockScope, sil
           var blocks = evalMarkdown.getBlocks(data.html, data.mdReference, pkg)
           blocks = _.map(blocks, function (block, id) {
             block.id = id + 1
-            return evalMarkdown.assembleBlock(block, blockCounter, data.mdContent, data.mdContentLines, includePrevented)
+            block = evalMarkdown.assembleBlock(block, blockCounter, data.mdContent, data.mdContentLines, includePrevented)
+            var temp = path.join(os.tmpdir(), 'evalmd')
+            block.assignFileHashPath = (block.assignFileHash) ? path.join(temp, block.assignFileHash) : undefined
+            if (block.assignFileHashPath) blockScope = true
+            return block
           })
           return blocks
+        },
+        writeBlockfiles: function (data) {
+          return Promise.map(data.blocks, function (block) {
+            if (block.assignFileHashPath) {
+              return fs.mkdirsAsync(path.dirname(block.assignFileHashPath)).then(function () {
+                return fs.writeFileAsync(block.assignFileHashPath, block.asFile)
+              })
+            } else {
+              return undefined
+            }
+          })
         },
         jsFile: function (data) {
           return evalMarkdown.jsFile(data.blocks, data.mdContentLines)
@@ -81,6 +93,15 @@ function evalMarkdown (file$, prependPath, uniformPath, nonstop, blockScope, sil
             return evaluations
           }
           return evalMarkdown.evaluations(data.blocks, data.jsFile, fileName, pkg, prependPath, uniformPath, nonstop, blockScope)
+        },
+        removeBlockFiles: function (data) {
+          return Promise.map(data.blocks, function (block) {
+            if (block.assignFileHashPath) {
+              return fs.removeAsync(block.assignFileHashPath)
+            } else {
+              return undefined
+            }
+          })
         }
       }).then(function (data) {
         var haltedHappened = _.map(data.evaluations, 'halted')
@@ -109,6 +130,7 @@ function evalMarkdown (file$, prependPath, uniformPath, nonstop, blockScope, sil
   })
 }
 
+/** returns the exit code for the process based on errors */
 evalMarkdown.exitCode = function (dataSets) {
   var errors = _.chain(dataSets).map(function (data) {
     return _.map(data.evaluations, 'error')
@@ -118,28 +140,25 @@ evalMarkdown.exitCode = function (dataSets) {
   return 0
 }
 
+/** a wrapper for writing to stderr and storing messages */
 evalMarkdown.writeStderr = function (store, silence) {
   return function (data, type) {
+    var colorLessData = chalk.stripColor(data)
     if (!store.all) store.all = []
-    store.all.push(data)
+    store.all.push(colorLessData)
     if (type && !store[type]) store[type] = []
-    if (type) store[type].push(data)
+    if (type) store[type].push(colorLessData)
     if (!silence) process.stderr.write(data)
   }
 }
 
+/** standard error storage */
 evalMarkdown.stderr = {}
+
+/** a log wrapper for stderr */
 evalMarkdown.log = evalMarkdown.writeStderr(evalMarkdown.stderr)
 
-/** convert array to array of objects with set propety */
-evalMarkdown.arrToObjWithProp = function (arr, prop) {
-  return _.map(arr, function (item) {
-    var tmp = {}
-    tmp[prop] = item
-    return tmp
-  })
-}
-
+/** traverse the html tree and get js code blocks */
 evalMarkdown.getBlocks = function (html) {
   var $ = cheerio.load(html, {
     decodeEntities: true,
@@ -161,7 +180,7 @@ evalMarkdown.getBlocks = function (html) {
   .get()
 }
 
-/** gets the index of all duplicates */
+/** string.indexOf with duplicate support */
 evalMarkdown.multiIndexOf = function (s, ss) {
   var instances = S.count(s, ss)
   return _.chain(instances)
@@ -176,9 +195,10 @@ evalMarkdown.multiIndexOf = function (s, ss) {
   .value()
 }
 
-evalMarkdown.hashBlock = function (block) {
-  var shasum = crypto.createHash('sha256')
-  return shasum.update(block).digest('hex')
+/** returns a md5 hash of the content */
+evalMarkdown.hashBlock = function (content) {
+  var shasum = crypto.createHash('md5')
+  return shasum.update(content).digest('hex')
 }
 
 /** get line number of a ss or char */
@@ -193,13 +213,35 @@ evalMarkdown.getLineNumber = function (body, charOrString) {
   return 1
 }
 
+/** collect all the information about a code block */
 evalMarkdown.assembleBlock = function (block, blockCounter, mdContent, mdContentLines, includePrevented) {
   block.prevent = [
     Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/prevent eval/i)),
     Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/preventeval/i)),
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/evalprevent/i)),
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/eval prevent/i)),
     Boolean(block.code.match(/^\/\/ prevent eval/i)),
-    Boolean(block.code.match(/^\/\/ preventeval/i))
+    Boolean(block.code.match(/^\/\/ preventeval/i)),
+    Boolean(block.code.match(/^\/\/ eval prevent/i)),
+    Boolean(block.code.match(/^\/\/ evalprevent/i))
   ]
+
+  block.assignFileViaSibling = [
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/file eval/i)),
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/fileeval/i)),
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/eval file/i)),
+    Boolean(block.prevSiblingHref && block.prevSiblingHref.match(/evalfile/i))
+  ]
+
+  block.assignFileViaComment = block.code.match(/\/\/\s(file\s?eval\s|eval\s?file\s)(.+)/i)
+
+  if (_.contains(block.assignFileViaSibling, true)) {
+    block.assignFile = block.prevSiblingContent
+  } else if (block.assignFileViaComment) {
+    block.assignFile = block.assignFileViaComment[2]
+  }
+
+  block.assignFileHash = (block.assignFile) ? evalMarkdown.hashBlock(block.assignFile) + '.js' : block.assignFile
 
   block.codeLines = S.lines(block.code)
   block.blockSyntaxTypes = {
@@ -264,17 +306,21 @@ evalMarkdown.jsFile = function (blocks, mdContentLines) {
     // var parsedName = path.parse(dataSet.fileName)
     // var jsFile = parsedName.dir + parsedName.name + '.js'
     // fs.writeFileSync(jsFile, emptyDoc.join('\n'))
+    // really should not be happening :)
     throw new Error('internal error incorrect doc assembly contact maintainer directly <thomas@reggi.com>')
   }
   return jsFile.join('\n')
 }
 
+/** replace a string in a position */
 evalMarkdown.replacePosition = function (str, start, end, value) {
   return str.substr(0, start) + value + str.substr(end)
 }
 
-evalMarkdown.moduleParser = function (code, pkg, prependPath) {
+/** parse over the source and manipulate module definitions */
+evalMarkdown.moduleParser = function (blocks, code, pkg, prependPath) {
   prependPath = prependPath || './'
+  var localRegex = /^.\.\/|^.\//
   var ast = acorn.parse(code, {ecmaVersion: 6})
   var deps = umd(ast, {
     es6: true, amd: true, cjs: true
@@ -293,18 +339,40 @@ evalMarkdown.moduleParser = function (code, pkg, prependPath) {
       }
     })
   }
+
+  var charsSelfModules = 0
+  // convert self module def to absolute tmp file
+  _.each(deps, function (dep) {
+    if (dep.source.value) {
+      var foundBlock = _.find(blocks, {
+        'assignFile': dep.source.value
+      })
+      if (foundBlock) {
+        var start = charsSelfModules + dep.source.start + 1
+        var end = charsSelfModules + dep.source.end - 1
+        var newRef = foundBlock.assignFileHashPath
+        code = evalMarkdown.replacePosition(code, start, end, newRef)
+        charsSelfModules += Math.abs(newRef.length - dep.source.value.length)
+      }
+    }
+  })
+
   var charsAddedPrepend = 0
   // prefix local modules with dir
   if (prependPath) {
-    var localRegex = /^.\.\/|^.\/|^\//
     _.each(deps, function (dep) {
       if (dep.source.value && dep.source.value.match(localRegex)) {
-        var start = charsAddedPrepend + dep.source.start + 1
-        var end = charsAddedPrepend + dep.source.end - 1
-        var newRef = path.join(prependPath, dep.source.value)
-        if (!newRef.match(/^\/|\.+\//)) newRef = './' + newRef
-        code = evalMarkdown.replacePosition(code, start, end, newRef)
-        charsAddedPrepend += Math.abs(newRef.length - dep.source.value.length)
+        var foundBlock = _.find(blocks, {
+          'assignFile': dep.source.value
+        })
+        if (!foundBlock) {
+          var start = charsAddedPrepend + dep.source.start + 1
+          var end = charsAddedPrepend + dep.source.end - 1
+          var newRef = path.join(prependPath, dep.source.value)
+          if (!newRef.match(/^\/|\.+\//)) newRef = './' + newRef
+          code = evalMarkdown.replacePosition(code, start, end, newRef)
+          charsAddedPrepend += Math.abs(newRef.length - dep.source.value.length)
+        }
       }
     })
   }
@@ -318,16 +386,66 @@ evalMarkdown.findErrorBlock = function (items, line) {
   })
 }
 
+
+/** get the stack with the file lines */
+evalMarkdown.stackParts = function (stack) {
+  var stackLines = stack.split('\n')
+  var buckets = {
+    'frame': [],
+    'lines': []
+  }
+  _.each(stackLines, function (stackLine) {
+    var pattern = /^\s\s\s\sat\s/
+    var match = stackLine.match(pattern)
+    if (match) {
+      buckets.lines.push(stackLine)
+    } else {
+      buckets.frame.push(stackLine)
+    }
+  })
+  return buckets
+}
+
+/** join the stack from with the lines */
+evalMarkdown.stackJoin = function (stack) {
+  return [
+    stack.frame.join('\n'),
+    stack.lines.join('\n')
+  ].join('\n')
+}
+
+/** get the line:char from string */
+evalMarkdown.parseLineChar = function (s) {
+  if (s instanceof Error && s.message) s = s.message
+  var patternLineChar = /:(\d+):(\d+)/
+  var patternLine = /:(\d+)/
+
+  var matchLineChar = s.match(patternLineChar)
+  var matchLine = s.match(patternLine)
+  if (matchLineChar) {
+    matchLineChar.lineChar = matchLineChar[0]
+    matchLineChar.line = parseInt(matchLineChar[1], 10)
+    matchLineChar.char = parseInt(matchLineChar[2], 10)
+    return matchLineChar
+  } else if (matchLine) {
+    matchLine.lineChar = parseInt(matchLine[1], 10)
+    matchLine.line = parseInt(matchLine[1], 10)
+    matchLine.char = false
+    return matchLine
+  }
+  return false
+}
+
 /** acorn error */
 evalMarkdown.acornError = function (e, fileName, blocks, uniformPath) {
   var stack = e.stack
-  stack = defaultStack.stackParts(stack)
+  stack = evalMarkdown.stackParts(stack)
   var lineChar = [e.loc.line, ':', e.loc.column].join('')
   var errorBlock = evalMarkdown.findErrorBlock(blocks, e.loc.line)
   var resolvedPath = (uniformPath) ? fileName : path.resolve(fileName)
   var line = ['    at ', resolvedPath, ':', lineChar, ' {block ', errorBlock.id, '}'].join('')
   stack.lines = [line]
-  return defaultStack.stackJoin(stack)
+  return evalMarkdown.stackJoin(stack)
 }
 
 /** eval error */
@@ -335,23 +453,37 @@ evalMarkdown.evalError = function (e, fileName, blocks, uniformPath) {
   var baseName = path.basename(fileName)
   var resolvedPath = (uniformPath) ? fileName : path.resolve(fileName)
   var stack = e.stack
-  stack = defaultStack.stackParts(stack)
-  stack.lines = _.chain(stack.lines).map(function (line) {
-    var match = line.match(baseName)
-    if (match) {
-      var lineCharObj = defaultStack.parseLineChar(line)
-      var lineChar = [lineCharObj.line, ':', lineCharObj.char].join('')
-      var errorBlock = evalMarkdown.findErrorBlock(blocks, lineCharObj.line)
-      return ['    at ', resolvedPath, ':', lineChar, ' {block ', errorBlock.id, '}'].join('')
-    }
-    return line
+  stack = evalMarkdown.stackParts(stack)
+  stack.lines = _.chain(stack.lines)
+  .filter(function (line) {
+    return line.match(baseName)
+  })
+  .map(function (line) {
+    var lineCharObj = evalMarkdown.parseLineChar(line)
+    var lineChar = [lineCharObj.line, ':', lineCharObj.char].join('')
+    var errorBlock = evalMarkdown.findErrorBlock(blocks, lineCharObj.line)
+    return ['    at ', resolvedPath, ':', lineChar, ' {block ', errorBlock.id, '}'].join('')
   })
   .value()
+  var pattern = /:\d+$|\d+:\d+$/
+  var tempPath = stack.frame[0].replace(pattern, '')
+  var tempParsed = path.parse(tempPath)
+  var lastDir = _.last(tempParsed.dir.split(path.sep))
+  if (lastDir === 'evalmd') {
+    var foundBlock = _.find(blocks, {
+      'assignFileHash': tempParsed.base
+    })
+    if (foundBlock) {
+      var lineCharObj = evalMarkdown.parseLineChar(stack.frame[0])
+      var errorBlock = evalMarkdown.findErrorBlock(blocks, lineCharObj.line)
+      stack.frame[0] = [resolvedPath, '>', foundBlock.assignFile, ':', lineCharObj.lineChar, ' {block ', errorBlock.id, '}'].join('')
+    }
+  }
   stack.lines = [_.first(stack.lines)]
-  return defaultStack.stackJoin(stack)
+  return evalMarkdown.stackJoin(stack)
 }
 
-/** pull the javascript code blocks out of the HTML */
+/** send code off to be evaluated  */
 evalMarkdown.evaluations = function (blocks, code, fileName, pkg, prependPath, uniformPath, nonstop, blockScope, fileHalt) {
   var evaluations = []
   evaluations.preventEval = false
@@ -382,6 +514,7 @@ evalMarkdown.evaluations = function (blocks, code, fileName, pkg, prependPath, u
   return evaluations
 }
 
+/** evaluate code  */
 evalMarkdown.evaluate = function (blocks, code, pkg, prependPath, fileName, uniformPath, halt) {
   var block = (typeof code === 'object') ? code : false
 
@@ -403,7 +536,7 @@ evalMarkdown.evaluate = function (blocks, code, pkg, prependPath, fileName, unif
   }
 
   try {
-    code = evalMarkdown.moduleParser(code, pkg, prependPath)
+    code = evalMarkdown.moduleParser(blocks, code, pkg, prependPath)
   } catch (e) {
     var acornStack = evalMarkdown.acornError(e, fileName, blocks, uniformPath)
     evalMarkdown.logError(acornStack)
@@ -1181,5 +1314,15 @@ shimName: './calico.js'
 //       testMarkdown.logInfo('ok')
 //       return dataSets
 //     })
+//   })
+// }
+
+
+// /** convert array to array of objects with set propety */
+// evalMarkdown.arrToObjWithProp = function (arr, prop) {
+//   return _.map(arr, function (item) {
+//     var tmp = {}
+//     tmp[prop] = item
+//     return tmp
 //   })
 // }
