@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var yargs = require('yargs')
+var fs = require('fs')
 var evalMarkdown = require('../eval-markdown')
 var argv = yargs
   .usage('$0 - Evaluate the javascript in markdown files')
@@ -42,7 +43,7 @@ var argv = yargs
   .describe('package', 'Th path of a package.json')
   .default('package', './package.json')
   .version(function () {
-    return require('../package').version
+    return fs.readFileSync('../package.json').version
   })
   .wrap(null)
   .argv

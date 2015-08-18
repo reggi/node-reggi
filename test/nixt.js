@@ -36,7 +36,6 @@ describe(DESC, function () {
     .end(done)
   })
 
-
   it('should exit 1 with node eval', function (done) {
     return nixt()
     .run('node -e \"process.exit(1)"')

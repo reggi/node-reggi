@@ -1,18 +1,18 @@
-var path = require('path')
-// var assert = require('assert')
-var DESC = path.basename(__filename, path.extname(__filename))
-var evalMarkdown = require('../eval-markdown')
-
-/* global describe, it */
-
-// describe(DESC, function () {
-
-  return evalMarkdown('../docs/evalmd-prevent-eval.md')
-  .then(console.log)
-
-// })
-
-
+// var path = require('path')
+// // var assert = require('assert')
+// var DESC = path.basename(__filename, path.extname(__filename))
+// var evalMarkdown = require('../eval-markdown')
+//
+// /* global describe, it */
+//
+// // describe(DESC, function () {
+//
+//   return evalMarkdown('../docs/evalmd-prevent-eval.md')
+//   .then(console.log)
+//
+// // })
+//
+//
 
 // describe(DESC, function () {
 //

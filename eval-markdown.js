@@ -19,7 +19,6 @@ var promisePropsRipple = require('./promise-props-ripple')
  * @module evalmd
  * @package.keywords eval, evaulate, javascript, markdown, test
  * @package.preferGlobal
- * @package.scripts.test ./bin/eval-markdown.js ./README.md
  * @package.bin.evalmd ./bin/eval-markdown.js
  * @package.bin.test-markdown ./bin/eval-markdown.js
  * @package.bin.eval-markdown ./bin/eval-markdown.js
@@ -385,7 +384,6 @@ evalMarkdown.findErrorBlock = function (items, line) {
     return item.startLine <= line && item.endLine >= line
   })
 }
-
 
 /** get the stack with the file lines */
 evalMarkdown.stackParts = function (stack) {
@@ -1316,7 +1314,6 @@ shimName: './calico.js'
 //     })
 //   })
 // }
-
 
 // /** convert array to array of objects with set propety */
 // evalMarkdown.arrToObjWithProp = function (arr, prop) {
