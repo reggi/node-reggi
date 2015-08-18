@@ -1,79 +1,54 @@
-var Promise = require("bluebird")
-Promise.prototype.always = function(fn){return this.then(fn, fn)}
-var empty = function(done){ done() }
-var chai = require("chai")
-var expect = chai.expect
-var request = require("supertest-as-promised")
-var createExpressApp = require("../create-express-app")
-
+var S = require("underscore.string")
 var express = require("express")
-var router = express.Router
+var promiseRouter = require('express-promise-router')
+var argx = require('argx')
+var _ = require("underscore")
 
-describe('create-express-app.js', function(){
-  it('respond with json', function(done){
-    var app = createExpressApp(router, "get", '/anonymous-router', function(req, res){
-      return res.json({ name: 'tobi' })
-    })
+function createExpressApp(/*Router, method, url, middleware*/) {
+  var args = argx(arguments)
+  var Router = args.shift('function') || express
+  var method = args.shift('string') || "use"
+  var url = args.shift('string') || null
+  var middleware = _.flatten([args.remain()])
+  var router = Router()
+  if(url) router[method](url, middleware)
+  if(!url) router[method](middleware)
+  return router
+}
 
-    request(app)
-      .get('/anonymous-router')
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200, done)
+createExpressApp.appRouter = function(){
+  return express()
+}
+createExpressApp.router = function(){
+  return express.Router()
+}
+createExpressApp.promiseRouter = function(){
+  return promiseRouter()
+}
+createExpressApp.routers = ["appRouter", "router", "promiseRouter"]
 
+var createExpressAppWithRoutes = _.chain(createExpressApp.routers).map(function(prop){
+  var name = "with" + S.capitalize(prop)
+  return [name, function(){
+    var args = _.values(arguments)
+    args.unshift(createExpressApp[prop]())
+    return createExpressApp.apply(null, args)
+  }]
+}).object().value()
+
+_.extend(createExpressApp, createExpressAppWithRoutes)
+
+createExpressApp.array = function(/*Router, method, url, middleware*/){
+  var args = argx(arguments)
+  var routers = _.values(_.pick.apply(null, _.flatten([createExpressApp, createExpressApp.routers])))
+  var method = args.shift('string') || "use"
+  var url = args.shift('string') || null
+  var middleware = _.flatten([args.remain()])
+  return _.map(routers, function(RouterCapsule){
+    var Router = RouterCapsule()
+    var args = [Router, method, url, middleware]
+    return createExpressApp.apply(null, args)
   })
-})
-//   describe('testing app.get with anonymous-router', function(){
-//     it('respond with json', function(done){
-//       var app = createExpressApp.withAppRouter("get", '/anonymous-router', function(req, res){
-//         return res.json({ name: 'tobi' })
-//       })
-//       request(app)
-//         .get('/anonymous-router')
-//         .set('Accept', 'application/json')
-//         .expect('Content-Type', /json/)
-//         .expect(200, done)
-//     })
-//   })
-//   describe('testing app.get with express-router', function(){
-//     it('respond with json', function(done){
-//       var app = createExpressApp.withRouter("get", '/express-router', function(req, res){
-//         return res.json({ name: 'tobi' })
-//       })
-//       request(app)
-//         .get('/express-router')
-//         .set('Accept', 'application/json')
-//         .expect('Content-Type', /json/)
-//         .expect(200, done)
-//     })
-//   })
-//   describe('testing app.get with promise-router', function(){
-//     it('respond with json', function(done){
-//       var app = createExpressApp.withPromiseRouter("get", '/promise-router', function(req, res){
-//         return res.json({ name: 'tobi' })
-//       })
-//       request(app)
-//         .get('/promise-router')
-//         .set('Accept', 'application/json')
-//         .expect('Content-Type', /json/)
-//         .expect(200, done)
-//     })
-//   })
-//   describe('testing app.get with all routers', function(){
-//     it('respond with json', function(done){
-//       var apps = createExpressApp.array("get", '/router', function(req, res){
-//         return res.json({ name: 'tobi' })
-//       })
-//       Promise.map(apps, function(app){
-//         return request(app)
-//           .get('/router')
-//           .set('Accept', 'application/json')
-//           .expect('Content-Type', /json/)
-//           .expect(function(res) {
-//             expect(res).to.have.deep.property("body.name", "tobi")
-//           })
-//           .expect(200)
-//       }).then(empty(done))
-//     })
-//   })
-// })
+}
+
+module.exports = createExpressApp

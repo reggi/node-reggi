@@ -1,0 +1,116 @@
+#!/usr/bin/env node
+
+
+//
+
+//
+//
+// var request = require("supertest-as-promised")
+// var express = require("express")
+// var app = express()
+//
+// describe("express", function(done){
+//
+//   describe("app.use", function(done){
+//
+//     it("send json with url", function(done){
+//
+//       app.use("/", function(req, res){
+//         return res.json({ name: 'tobi' })
+//       })
+//
+//       request(app)
+//         .get('/')
+//         .set('Accept', 'application/json')
+//         .expect('Content-Type', /json/)
+//         .expect(function(res) {
+//           expect(res).to.have.deep.property("body.name", "tobi")
+//         })
+//         .expect(200, done)
+//
+//     })
+//
+//     it("should send json without url", function(done){
+//
+//       app.use(function(req, res){
+//         return res.json({ name: 'tobi' })
+//       })
+//
+//       request(app)
+//         .get('/')
+//         .set('Accept', 'application/json')
+//         .expect('Content-Type', /json/)
+//         .expect(function(res) {
+//           expect(res).to.have.deep.property("body.name", "tobi")
+//         })
+//         .expect(200, done)
+//
+//     })
+//
+//     it("should send json with any url", function(done){
+//
+//       app.use(function(req, res){
+//         return res.json({ name: 'tobi' })
+//       })
+//
+//       request(app)
+//         .get('/sets-any-url')
+//         .set('Accept', 'application/json')
+//         .expect('Content-Type', /json/)
+//         .expect(function(res) {
+//           expect(res).to.have.deep.property("body.name", "tobi")
+//         })
+//         .expect(200, done)
+//
+//     })
+//
+//   })
+//
+// })
+//
+//
+//
+// // var _ = require("underscore")
+// // _.mixin(require("../mixin"))
+// //
+// // console.log(_.consumer())
+// //
+//
+//
+// // #!/usr/bin/env node
+// // var middlewareRun = require("../middleware-run")
+// // var createExpressApp = require("../create-express-app")
+// //
+// // var express = require("express")
+// // // var router = express.Router
+// // // var app = express()
+// //
+// //
+// // function createExpressApp(/*Router, method, url, middleware*/) {
+// //   var app = express()
+// //   var args = argx(arguments)
+// //   var Router = args.shift('function') || false
+// //   var method = args.shift('string') || "use"
+// //   var url = args.shift('string') || null
+// //   var middleware = _.flatten([args.remain()])
+// //   var app = (Router) ? Router() : app
+// //   if(url) router[method](url, middleware)
+// //   if(!url) router[method](middleware)
+// //   app.use()
+// //   return router
+// // }
+// //
+// //
+// //
+// // var app = createExpressApp(app, function(req, res, next){
+// //   return res.json({ name: 'tobi' })
+// // })
+// //
+// // console.log(app)
+//
+// // var server = app.listen(3000, function () {
+// //   var host = server.address().address;
+// //   var port = server.address().port;
+// //
+// //   console.log('Example app listening at http://%s:%s', host, port);
+// // })
