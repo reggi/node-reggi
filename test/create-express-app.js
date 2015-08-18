@@ -6,7 +6,7 @@ var expres = chai.expect
 var request = require("supertest-as-promised")
 var createExpressApp = require("../create-express-app")
 
-describe('create-express-app.js', function(){
+describe('helpers-app-helpers.js', function(){
   describe('testing app.get with anonymous-router', function(){
     it('respond with json', function(done){
       var app = createExpressApp.withAppRouter("get", '/anonymous-router', function(req, res){
