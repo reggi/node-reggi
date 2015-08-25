@@ -47,7 +47,7 @@
     "jsdoc-parse": "^1.0.0",
     "jsdoc-to-markdown": "^1.1.1",
     "lodash": "^3.10.0",
-    "markdown-it": "^4.4.0",
+    "markdown-it": "markdown-it/markdown-it#255d62d39122694872ddce840e2141379ac3deca",
     "marked": "^0.3.5",
     "minimatch": "^2.0.10",
     "minimist": "^1.1.2",

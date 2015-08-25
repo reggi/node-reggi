@@ -18,6 +18,16 @@ var temp = path.join(os.tmpdir(), 'evalmd')
 var log = false
 var DEBUG = false
 
+/**
+ * :fishing_pole_and_fish: Evaluates javascript code blocks from markdown files.
+ * @module evalmd
+ * @package.keywords eval, evaulate, javascript, markdown, test
+ * @package.preferGlobal
+ * @package.bin.evalmd ./bin/eval-markdown.js
+ * @package.bin.test-markdown ./bin/eval-markdown.js
+ * @package.bin.eval-markdown ./bin/eval-markdown.js
+ */
+
 function main (filePath$, packagePath, prepend, blockScope, nonstop, preventEval, includePrevented, silence, debug, output, delimeter) {
   var logStore = []
   DEBUG = debug
